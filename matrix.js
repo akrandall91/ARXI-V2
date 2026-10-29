@@ -1,7 +1,13 @@
 /* ARXI LED matrix preview, full RGB. ArxiMatrix(canvas,{w,h,onLabel}) -> {setScenes(list), setSize(w,h), size()}
    Scene: {label, lines:[{t,c}], icon, iconColor, dim, hold, fx, fxColors}
-   Line colour c: '#hex' | 'flow' (moving spectrum) | 'rainbow' | ['#a','#b'] (gradient) | 'team' (team colours by abbreviation)
-   fx: 'viz' | 'ambient' | 'sunrise' | 'burst' | 'wash'  (drawn behind text; full strength when a scene has no text) */
+   Line colour c: '#hex' | 'sung' (lyrics: the song's own colour, words light up as they are sung) | 'song' (the song's colour)
+                  | ['#a','#b'] (gradient) | 'team' (team colours by abbreviation). 'flow'/'rainbow' are old names for 'song'.
+   fx (drawn behind text; full strength when a scene has no text), each modelled on the firmware (ARXIv2):
+     'viz'      the music: on a Bar, the style background moving with the beat (Carbon sweep + sparkles);
+                on a Panel, the 'bars' visualizer from its own mic
+     'ambient'  the Vibrant style field in one hue      'sunrise' the wake-up light (night, dawn, day; the sun rises)
+     'burst'/'touchdown'  the touchdown moment: team-colour stripes sweep in, then rings burst in team colours
+     'wash'     Screen colours: your colour as the backdrop at a quarter strength */
 (function(){
   const F={'0':[7,5,5,5,7],'1':[2,6,2,2,7],'2':[7,1,7,4,7],'3':[7,1,3,1,7],'4':[5,5,7,1,1],'5':[7,4,7,1,7],'6':[7,4,7,5,7],'7':[7,1,1,2,2],'8':[7,5,7,5,7],'9':[7,5,7,1,7],
   A:[2,5,7,5,5],B:[6,5,6,5,6],C:[3,4,4,4,3],D:[6,5,5,5,6],E:[7,4,6,4,7],F:[7,4,6,4,4],G:[3,4,5,5,3],H:[5,5,7,5,5],I:[7,2,2,2,7],J:[1,1,1,5,2],K:[5,5,6,5,5],L:[4,4,4,4,7],M:[5,7,7,5,5],N:[6,5,5,5,5],O:[2,5,5,5,2],P:[6,5,6,4,4],Q:[2,5,5,7,3],R:[6,5,6,5,5],S:[3,4,2,1,6],T:[7,2,2,2,2],U:[5,5,5,5,7],V:[5,5,5,5,2],W:[5,5,7,7,5],X:[5,5,2,5,5],Y:[5,5,2,2,2],Z:[7,1,2,4,7],
@@ -36,12 +42,13 @@
   function auto(sc){
     if(sc._auto)return sc;const s=Object.assign({},sc,{_auto:true}),L=String(sc.label||'');
     if(!s.fx){
-      if(/touchdown|celebrat|goal|win/i.test(L))s.fx='burst';
+      if(/touchdown|celebrat/i.test(L))s.fx='burst';
       else if(/sunrise|morning|wake/i.test(L))s.fx='sunrise';
       else if(/in sync|ambient|party|sound/i.test(L))s.fx='viz';
     }
     if(s.lines&&!s.dim){s.lines=s.lines.map((l,i)=>{if(!l||!l.t)return l;
-      if(!l.c&&/lyric|now playing|any app/i.test(L)&&i===Math.min(1,s.lines.length-1))return Object.assign({},l,{c:'flow'});
+      if((!l.c||l.c==='flow')&&/lyric/i.test(L)&&i===Math.min(1,s.lines.length-1))return Object.assign({},l,{c:'sung'});
+      if(!l.c&&/now playing|any app/i.test(L)&&i===Math.min(1,s.lines.length-1))return Object.assign({},l,{c:'song'});
       if(/score|game|matchup|scoreboard/i.test(L)&&/^[A-Z]{2,4} /.test(l.t)&&TEAM[l.t.split(' ')[0]]&&(!l.c||l.c===C.WH||l.c===C.CY||l.c===C.AMB||l.c==='#F4EEE4'||l.c==='#62D2DE'||l.c==='#FFB04A'))return Object.assign({},l,{c:'team'});
       return l})}
     return s;
@@ -51,19 +58,22 @@
     let W=opts.w||44,H=opts.h||11,scenes=[],idx=0,t0=performance.now(),raf=0,grid=[],bars=[];
     const ctx=canvas.getContext('2d');
     const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    function colorAt(c,x,i,n,el){
+    function colorAt(c,x,i,n,el,info){
       if(Array.isArray(c))return mix(c[0],c[1],Math.max(0,Math.min(1,x/W)));
-      if(c==='flow')return hsl(x*7-el/12,95,62);
-      if(c==='rainbow')return hsl(x*8,95,60);
+      if(c==='flow'||c==='rainbow'||c==='song')return hsl(info.hue,80,62);
+      if(c==='sung'){ /* the firmware's lyric colours: sung words bright, the rest of the line dim, in the song's hue */
+        const sung=info.scroll?x<W*.55:i<n*Math.min(1,(el%4200)/3400);
+        return sung?hsl(info.hue,70,86):hsl(info.hue,55,34)}
       return c;
     }
-    function blit(s,x,y,col,el){
-      const up=String(s).toUpperCase();let team=null;
+    const songHue=t=>{let h=2166136261;for(const ch of String(t)){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)>>>0}return h%360};
+    function blit(s,x,y,col,el,scroll){
+      const up=String(s).toUpperCase();let team=null;const info={hue:songHue(up),scroll:!!scroll};
       if(col==='team'){const first=up.split(' ')[0];team={len:first.length,c:TEAM[first]||C.WH}}
       let ci=0;
       for(const ch of up){const g=F[ch]||F[' '];
         const c0=team?(ci<team.len?team.c:C.WH):null;
-        for(let r=0;r<5;r++)for(let c=0;c<3;c++){if(g[r]&(4>>c)){const px=x+c,py=y+r;if(px>=0&&px<W&&py>=0&&py<H)grid[py*W+px]=c0||colorAt(col,px,ci,up.length,el)}}
+        for(let r=0;r<5;r++)for(let c=0;c<3;c++){if(g[r]&(4>>c)){const px=x+c,py=y+r;if(px>=0&&px<W&&py>=0&&py<H)grid[py*W+px]=c0||colorAt(col,px,ci,up.length,el,info)}}
         x+=4;ci++}
     }
     const rows=()=>H>11?[1,8,15]:[0,6];
@@ -71,16 +81,39 @@
     function fx(sc,el,k){
       const t=el/1000;
       for(let y=0;y<H;y++)for(let x=0;x<W;x++){let col=null;
-        if(sc.fx==='viz'){if(!bars.length||bars.length!==W)bars=new Array(W).fill(0);
-          if(y===0){const target=(Math.sin(x*.55+t*5.3)*.5+.5)*(Math.sin(x*.17-t*2.1)*.5+.5)*H*1.1+Math.random()*1.5;bars[x]+=(target-bars[x])*.35}
-          const hgt=bars[x];if(H-1-y<hgt)col=hsl(x*8+t*40,95,58-((H-1-y)/H)*8)}
-        else if(sc.fx==='ambient'){const v=Math.sin(x*.18+t*.7)+Math.sin(y*.35-t*.5)+Math.sin((x+y)*.12+t*.4);col=hsl(200+v*55+t*12,85,48)}
-        else if(sc.fx==='sunrise'){const f=y/(H-1),p=(Math.sin(t*.6)*.5+.5)*.15;col=mix('#3B1C6E','#FF8A1F',Math.min(1,f+p));if(f>.75)col=mix('#FF8A1F','#FFD86B',(f-.75)*4)}
-        else if(sc.fx==='burst'){const cx=W/2,cy=H/2,d=Math.hypot((x-cx)*.6,y-cy),ring=(t*14)%(W*.6);
-          if(Math.abs(d-ring)<1.2)col=hsl(d*18+t*90,100,60);else if(Math.random()<.03)col=hsl(Math.random()*360,100,65)}
-        else if(sc.fx==='wash'){const cs=sc.fxColors||['#FF4FD8','#3FE0FF'];col=mix(cs[0],cs[1],(Math.sin(x*.12-t*1.2)*.5+.5))}
+        const hue=sc._hue!=null?sc._hue:(sc._hue=songHue(sc.label||''));
+        if(sc.fx==='viz'&&H<=11){ /* Bar: the style background with the music (firmware carbonMusicField): a dark weave, a sweep of colour on each beat, sparkles */
+          const wv=((x+y)&3)===0?26:((x+40-y)&3)===0?16:8;let r=wv,g=wv+1,b=wv+4;
+          const beat=(t*112/60)%1,sp=beat*1.6;const head=sp*(W+H/2+12)-2,d=head-(x+(y>>1));
+          if(sp<1&&d>=0&&d<10){const v=(1-d/10)*.85;const c=hslToRgb(hsl(hue,100,50)).match(/\d+/g).map(Number);r+=c[0]*v;g+=c[1]*v;b+=c[2]*v}
+          if(((x*7+y*13+Math.floor(t*4))%37)===0){r=190;g=205;b=235}
+          col='rgb('+[r,g,b].map(v=>Math.min(255,Math.round(v))).join(',')+')'}
+        else if(sc.fx==='viz'){ /* Panel: the 'bars' visualizer, 16 bands from its own mic, in the theme's colour ramp */
+          if(!bars.length||bars.length!==16)bars=new Array(16).fill(0);
+          const band=Math.floor(x*16/W);
+          if(y===0&&x%Math.ceil(W/16)===0){const beat=Math.exp(-((t*112/60)%1)*5);const target=(band<4?.35+.6*beat:.25+.45*(.5+.5*Math.sin(t*2.1*(1+band*.37)+band)))*H;bars[band]+=(target-bars[band])*.4}
+          const hgt=bars[band];if(H-1-y<hgt&&(x%Math.ceil(W/16))<Math.ceil(W/16)-1)col=hsl(hue+((H-1-y)/H)*40,90,52+((H-1-y)/H)*14)}
+        else if(sc.fx==='ambient'){ /* the Vibrant style field: one hue, slow waves, a few sparks */
+          const a=Math.sin(x*.17+t*.9),b=Math.sin(y*.55+x*.07-t*.7);const v=.25+.35*((a*.5+.5)*(b*.25+.75));col=hsl(hue+a*8,85,v*60)}
+        else if(sc.fx==='sunrise'){ /* the wake-up light (firmware sunScene): night to day, dawn at the horizon, the sun rising */
+          const p=Math.min(1,(t%14)/11),hz=H-3,dawn=Math.max(0,1-Math.abs(p-.35)/.35);
+          const lerp=(a,b,k)=>a.map((v,i)=>v+(b[i]-v)*k),night=[1,1,10],dayc=[40,140,255],dn=[255,60,0];let c;
+          if(y>hz)c=lerp([4,3,8],[220,70,10],y===hz+1?dawn*.78:0).map(v=>v*(.14+p*.27));
+          else{const rf=y/hz;c=lerp(lerp(night,dayc,p),dn,Math.min(1,dawn*(.25+.75*rf)*1.4)*.9)}
+          const sy=(hz+1)-p*(hz+2),dd=Math.hypot(x-W/2,(y-sy)*1.0);
+          if(dd<=3&&y<=hz){const core=lerp(lerp([220,20,0],[255,140,10],Math.min(1,p*2.2)),[255,250,220],Math.max(0,Math.min(1,(p-.45)*2.5)));const k=dd<=1.5?1:dd<=2.3?.6:.25;c=c.map((v,i)=>Math.min(255,v*(1-k)+core[i]*k))}
+          col='rgb('+c.map(v=>Math.round(v)).join(',')+')'}
+        else if(sc.fx==='burst'||sc.fx==='touchdown'){ /* the touchdown (firmware floodFrom + burst): stripes in team colours sweep in, then rings burst */
+          const P=sc._team||(sc._team=teamOf(sc)),A=mix(P,'#000000',.55),cyc=(t*1000)%5400;
+          if(cyc<2400){const front=Math.min(W,cyc*W/800),xx=W-1-x;if(xx<front)col=(((xx+Math.floor(cyc/70))/3|0)&1)?P:A}
+          else{col=mix(P,'#000000',.9);const cc=(cyc-2400)%1800;
+            for(let b=0;b<3;b++){const cx=W*(8+b*14)/44,cy=H*(3+(b&1)*3)/11,r=Math.min(9,((cc+b*550)%1800)/130)*W/44;const d=Math.hypot(x-cx,(y-cy)*2);
+              if(Math.abs(d-r)<.8)col=b===0?P:b===1?A:'#FFFFFF'}}}
+        else if(sc.fx==='wash'){ /* Screen colours (My colours): your colour as the backdrop at a quarter */
+          const cs=sc.fxColors||['#FF4FD8'];col=mix(cs[0],'#000000',.75)}
         if(col)grid[y*W+x]=k<1?scale(col.startsWith('hsl')?hslToRgb(col):col,k):col}
     }
+    function teamOf(sc){if(sc.team&&TEAM[sc.team])return TEAM[sc.team];for(const l of sc.lines||[]){const a=String(l&&l.t||'').split(' ');for(const w of a)if(TEAM[w]&&w.length>1)return TEAM[w]}return C.GRN}
     function hslToRgb(s){const [h,sa,l]=s.match(/[\d.]+/g).map(Number);const S=sa/100,Lg=l/100,a=S*Math.min(Lg,1-Lg),f=n=>{const k=(n+h/30)%12;return Lg-a*Math.max(-1,Math.min(k-3,9-k,1))};
       return'rgb('+[f(0),f(8),f(4)].map(v=>Math.round(v*255)).join(',')+')'}
     function render(now){
@@ -92,7 +125,7 @@
         if(tw>W)x=reduce?0:W-Math.floor(el/70)%(tw+W+8);
         /* clear a dark band behind text so it stays readable over effects */
         if(sc.fx&&!sc.dim)for(let r=-0;r<5;r++)for(let c=Math.max(0,x-1);c<Math.min(W,x+tw+1);c++){const yy=ys[i]+r;if(yy<H)grid[yy*W+c]=null}
-        blit(l.t,x,ys[i],sc.dim?C.DIM:(l.c||C.WH),el)});
+        blit(l.t,x,ys[i],sc.dim?C.DIM:(l.c||C.WH),el,tw>W)});
       if(sc.icon&&SPR[sc.icon]){const sp=SPR[sc.icon];
         sp.m.forEach((row,r)=>[...row].forEach((ch,c)=>{if(ch!=='.'){const y=ys[0]+r,x=W-5+c;if(y<H){let col=sc.iconColor&&sc.iconColor!=='auto'&&!/^#?(62D2DE|3FE0FF)$/i.test(sc.iconColor)?sc.iconColor:sp.p[ch];if(sc.dim)col=C.DIM;grid[y*W+x]=col}}}))}
       paint(sc.dim);
@@ -136,6 +169,6 @@
       size(){return{w:W,h:H}}
     };
   }
-  ArxiMatrix.C=C;ArxiMatrix.TEAM=TEAM;
+  ArxiMatrix.C=C;ArxiMatrix.TEAM=TEAM;ArxiMatrix.FONT=F;ArxiMatrix.SPR=SPR;
   window.ArxiMatrix=ArxiMatrix;
 })();
