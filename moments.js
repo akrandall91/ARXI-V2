@@ -209,5 +209,14 @@
     return{show(id,m){cur=M.find(x=>x.id===id)||cur;if(m)mode=m;sync()}};
   }
   ArxiMoments.list=M.map(m=>({id:m.id,name:m.name}));
+  /* one moment looping on one canvas: kind 'bar' or 'panel', mode as in the picker ('bar'|'panel'|'both') */
+  ArxiMoments.player=function(canvas,id,o){o=o||{};const m=M.find(x=>x.id===id);if(!m||!canvas)return null;
+    const kind=o.kind||'bar',mode=o.mode||kind,g=kind==='panel'?new Grid(44,22):new Grid(44,11),t0=performance.now();
+    const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;let raf=0,live=true,vis=true;
+    function draw(now){const t=reduce?m.period*.42:(now-t0)%m.period;m[kind](g,t,mode);paint(canvas,g);if(o.onLabel)o.onLabel(m.name)}
+    function loop(now){raf=0;if(!live||!canvas.isConnected)return;draw(now);if(vis&&!reduce)raf=requestAnimationFrame(loop)}
+    let io=null;if('IntersectionObserver' in window){io=new IntersectionObserver(es=>{vis=es[0].isIntersecting;if(vis&&!raf&&live)raf=requestAnimationFrame(loop)});io.observe(canvas)}
+    draw(performance.now());if(!reduce)raf=requestAnimationFrame(loop);
+    return{stop(){live=false;cancelAnimationFrame(raf);if(io)io.disconnect()},name:m.name}};
   window.ArxiMoments=ArxiMoments;
 })();

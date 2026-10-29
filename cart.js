@@ -2,9 +2,9 @@
 (function(){
   const FINISHES={black:'Black',white:'White'};
   const PROD={
-    lite:{name:'Lite Bar',short:'Lite',price:159,add:139,size:'Bar · two lines'},
-    probar:{name:'Pro Bar',short:'Pro Bar',price:249,add:229,size:'Bar · two lines'},
-    panel:{name:'Pro Panel',short:'Panel',price:299,add:279,size:'Panel · three lines'}
+    lite:{name:'Lite Bar',short:'Lite',price:159,add:139,size:'Bar · 13 × 3.5 in'},
+    probar:{name:'Pro Bar',short:'Pro Bar',price:249,add:229,size:'Bar · 13 × 3.5 in'},
+    panel:{name:'Pro Panel',short:'Panel',price:299,add:279,size:'Panel · 13 × 7 in'}
   };
   const HUB=49;
   const SETS=[

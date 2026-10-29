@@ -57,6 +57,10 @@ thead th.cur{color:var(--amber)}
 .legend{display:flex;gap:6px;flex-wrap:wrap}
 .dots{display:flex;gap:6px}
 details.xc.off>summary b{opacity:.5}
+details.xc.has-pv>summary b::after{content:"";display:inline-block;width:0;height:0;margin-left:8px;border-left:6px solid var(--amber);border-top:4px solid transparent;border-bottom:4px solid transparent;vertical-align:1px}
+.xpv{display:grid;gap:6px;max-width:440px}
+.xpv .bezel{padding:10px}
+.xpv-l{font:500 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
 .boxlist{margin:0;padding:0;list-style:none;display:grid;gap:10px;font-size:15px}
 .boxlist li{display:grid;grid-template-columns:14px 1fr;gap:10px}
 .boxlist li::before{content:"";width:6px;height:6px;margin-top:9px;border-radius:50%;background:var(--amber);box-shadow:0 0 8px var(--amber)}
@@ -234,7 +238,7 @@ details.xc.off>summary b{opacity:.5}
       <div class="sec-head">
         <p class="eyebrow">Everything it does</p>
         <h2 id="f-title">Lite Bar features</h2>
-        <p>Open a group, then tap any feature for the details.</p>
+        <p>Tap a feature to watch it play.</p>
       </div>
       <div class="f-ctl">
         <div class="seg" id="scope" role="radiogroup" aria-label="Which features to show">
@@ -287,7 +291,7 @@ details.xc.off>summary b{opacity:.5}
           <p class="d-desc" id="d-desc"></p>
           <div>
             <div class="bezel"><canvas id="d-canvas" width="880" height="220" aria-label="What this looks like on the display"></canvas></div>
-            <div class="bezel-meta"><span id="d-label">On the display</span><span><b>Bar</b> · two lines of text</span></div>
+            <div class="bezel-meta"><span id="d-label">On the display</span><span><b>Bar</b> · 13 × 3.5 in · two lines</span></div>
           </div>
           <div class="d-block"><span class="ctl-label">Works on</span><div class="d-tiers" id="d-tiers"></div></div>
           <div class="d-block"><span class="ctl-label">You'll need</span><ul id="d-needs"></ul></div>
@@ -334,6 +338,7 @@ details.xc.off>summary b{opacity:.5}
 
 <script src="matrix.js"></script>
 <script src="models3d.js"></script>
+<script src="moments.js"></script>
 <script src="cart.js"></script>
 <script>
 (function(){
@@ -690,7 +695,7 @@ details.xc.off>summary b{opacity:.5}
     'lite':{key:'L',name:'Lite Bar',eyebrow:'ARXI Bar · Tier 01',price:159,note:'Single Bar',w:44,h:11,
       pitch:'The essentials on a strip of light: the time, the weather, today’s games and your own messages. Plug it in, join Wi-Fi, done.',
       best:['Kitchen','Bedroom','Kids’ room'],
-      specs:[['Display','Slim bar, two lines of text, behind a frosted diffuser'],['Color','Full color, set pixel by pixel'],['Controller','ESP32, 2.4 GHz Wi-Fi'],['Sensors','None'],['Music','Not included'],['Power','5 V wall adapter, included'],['Settings','Browser page on your home network'],['Connects','Yes, with 2+ displays. Presence features need Pro.'],['Add-ons','7 of 10']],
+      specs:[['Size','13 × 3.5 in (width × height)'],['Display','Slim bar, two lines of text, behind a frosted diffuser'],['Color','Full color, set pixel by pixel'],['Controller','ESP32, 2.4 GHz Wi-Fi'],['Sensors','None'],['Music','Not included'],['Power','5 V wall adapter, included'],['Settings','Browser page on your home network'],['Connects','Yes, with 2+ displays. Presence features need Pro.'],['Add-ons','7 of 10']],
       box:['Lite Bar with diffuser front','5 V power adapter','Wall-mount hardware','Quick-start card with your settings link'],
       scenes:[{label:'Clock & weather',icon:'sun',lines:[{t:'10:42 PM',c:WH},{t:'68* CLEAR',c:AMB}]},
               {label:'Today’s games',lines:[{t:'NYG 17 Q3',c:CY},{t:'PHI 21 4:12',c:AMB}]},
@@ -698,15 +703,15 @@ details.xc.off>summary b{opacity:.5}
     'pro-bar':{key:'P',name:'Pro Bar',eyebrow:'ARXI Bar · Tier 02',price:249,note:'Single Bar',w:44,h:11,
       pitch:'Everything in Lite, plus a display that notices when you walk in, follows your music and moves with the room.',
       best:['Living room','Entryway','Office','Garage'],
-      specs:[['Display','Slim bar, two lines of text, behind a frosted diffuser'],['Color','Full color, set pixel by pixel'],['Controller','ESP32, 2.4 GHz Wi-Fi'],['Sensors','mmWave presence radar, room light sensor, sound-level mic'],['Music','What your Sonos or Denon HEOS speaker plays, from any app. Plex & Jellyfin as an add-on.'],['Power','5 V wall adapter, included'],['Settings','Browser page on your home network'],['Connects','Yes, with 2+ displays'],['Add-ons','All 10']],
+      specs:[['Size','13 × 3.5 in (width × height)'],['Display','Slim bar, two lines of text, behind a frosted diffuser'],['Color','Full color, set pixel by pixel'],['Controller','ESP32, 2.4 GHz Wi-Fi'],['Sensors','mmWave presence radar, room light sensor, sound-level mic'],['Music','What your Sonos or Denon HEOS speaker plays, from any app. Plex & Jellyfin as an add-on.'],['Power','5 V wall adapter, included'],['Settings','Browser page on your home network'],['Connects','Yes, with 2+ displays'],['Add-ons','All 10']],
       box:['Pro Bar with diffuser front and built-in sensors','5 V power adapter','Wall-mount hardware','Quick-start card with your settings link'],
       scenes:[{label:'Presence: someone walked in',lines:[{t:'WELCOME IN',c:AMB},{t:'68* CLEAR',c:CY}]},
               {label:'Synced lyrics',icon:'star',iconColor:AMB,lines:[{t:'LYRICS',c:AMB},{t:'CITY LIGHTS ON THE WATER TONIGHT',c:WH}]},
               {label:'Room empty: dimmed',dim:true,lines:[{t:'10:58',c:WH}]}]},
     'pro-panel':{key:'N',name:'Pro Panel',eyebrow:'ARXI Panel · Tier 02 · In development',price:299,note:'Single Panel',w:44,h:22,
-      pitch:'Everything in Pro Bar on the sharper Panel, with twice the height for three lines of text, a full scoreboard and bigger type. The Panel is in development, with its layouts being built now.',
+      pitch:'Everything in Pro Bar on the sharper Panel, twice as tall at 13 × 7 in, with three lines of text, a full scoreboard and bigger type. The Panel is in development, with its layouts being built now.',
       best:['Living room','Game room','Over the TV'],
-      specs:[['Display','Taller panel, three lines of text, behind a frosted diffuser'],['Color','Full color, set pixel by pixel'],['Controller','ESP32, 2.4 GHz Wi-Fi'],['Sensors','mmWave presence radar, room light sensor, sound-level mic'],['Music','What your Sonos or Denon HEOS speaker plays, from any app. Plex & Jellyfin as an add-on.'],['Power','5 V higher-current adapter, included'],['Settings','Browser page on your home network'],['Connects','Yes. Usually the main display when connected.'],['Add-ons','All 10']],
+      specs:[['Size','13 × 7 in (width × height)'],['Display','Taller panel, three lines of text, behind a frosted diffuser'],['Color','Full color, set pixel by pixel'],['Controller','ESP32, 2.4 GHz Wi-Fi'],['Sensors','mmWave presence radar, room light sensor, sound-level mic'],['Music','What your Sonos or Denon HEOS speaker plays, from any app. Plex & Jellyfin as an add-on.'],['Power','5 V higher-current adapter, included'],['Settings','Browser page on your home network'],['Connects','Yes. Usually the main display when connected.'],['Add-ons','All 10']],
       box:['Pro Panel with diffuser front and built-in sensors','5 V higher-current power adapter','Wall-mount hardware','Quick-start card with your settings link'],
       scenes:[{label:'Three-line scoreboard',icon:'ball',lines:[{t:'NYG 17',c:CY},{t:'PHI 21',c:GRN},{t:'Q3 4:12',c:AMB}]},
               {label:'Lyric + info row',icon:'note',lines:[{t:'NOW PLAY',c:GRN},{t:'CITY LIGHTS ON THE WATER',c:WH},{t:'LOW HOURS',c:CY}]},
@@ -726,7 +731,7 @@ details.xc.off>summary b{opacity:.5}
   const $=id=>document.getElementById(id);
 
   function renderCompare(cur){
-    const rows=[['Price',p=>'$'+p.price],['Display',p=>p.h===22?'Panel, three lines':'Bar, two lines']];
+    const rows=[['Price',p=>'$'+p.price],['Display',p=>p.h===22?'Panel, 13 × 7 in, three lines':'Bar, 13 × 3.5 in, two lines']];
     const feats=[['Clock, weather, scores, messages','LPN'],['Three-line layouts','N'],['Sonos & HEOS + synced lyrics','PN'],['Sound-reactive light','PN'],['Presence wake & dim','PN'],['Room light sensor','PN'],['Connects with 2+ displays','LPN'],['Wakes only where people are','PN']];
     let h='<thead><tr><th scope="col">Feature</th>'+ORDER.map(k=>'<th scope="col" class="'+(k===cur?'cur':'')+'"><a href="#'+k+'">'+P[k].name+'</a></th>').join('')+'</tr></thead><tbody>';
     rows.forEach(r=>{h+='<tr><th scope="row">'+r[0]+'</th>'+ORDER.map(k=>'<td class="'+(k===cur?'cur':'')+'">'+r[1](P[k])+'</td>').join('')+'</tr>'});
@@ -735,6 +740,53 @@ details.xc.off>summary b{opacity:.5}
     $('cmp').innerHTML=h;
   }
 
+  /* tap a feature to see it: real moments from moments.js, the rest as display scenes */
+  const PV=(function(){const C=ArxiMatrix.C,S=(...a)=>({s:a});return{
+    'Clock & 8 screen styles':S({label:'Clock',icon:'moon',lines:[{t:'10:42 PM',c:C.WH},{t:'TUE OCT 28',c:C.CY}]},{label:'Night style',dim:true,lines:[{t:'10:58'}]}),
+    'Your screen rotation':S({label:'Clock',lines:[{t:'10:42 PM',c:C.WH},{t:'68* CLEAR',c:C.AMB}],hold:2600},{label:'Games',lines:[{t:'NYG 17 Q3'},{t:'PHI 21 4:12'}],hold:2600},{label:'Moon',icon:'moon',lines:[{t:'WAXING',c:C.WH},{t:'78% LIT',c:C.CY}],hold:2600}),
+    'Screen colours':S({label:'Your colours',lines:[{t:'10:42',c:'#21D4FD'},{t:'YOUR COLOR',c:'#21D4FD'}],fx:'wash',fxColors:['#21D4FD']},{label:'Team colours',lines:[{t:'GO BIRDS',c:'#00C2A8'},{t:'PHI 21',c:'#00C2A8'}],fx:'wash',fxColors:['#00C2A8']}),
+    'Weather, forecast & air quality':{m:'storm'},
+    'Moon phase & sun arc':S({label:'Moon',icon:'moon',lines:[{t:'WAXING',c:C.WH},{t:'78% LIT',c:C.CY}]},{label:'Sun arc',icon:'sun',lines:[{t:'UP 7:24',c:C.AMB},{t:'DOWN 6:12',c:C.VIO}]}),
+    'Show text & messages':S({label:'Message from your phone',lines:[{t:'MESSAGE',c:C.GRN},{t:'DINNER\'S READY - COME DOWN',c:C.WH}]}),
+    'Holiday & birthday scenes':S({label:'Birthday',icon:'heart',lines:[{t:'HAPPY BDAY',c:C.PNK},{t:'MAYA',c:C.YEL}],fx:'burst',team:'ARI'}),
+    'Hourly chime':S({label:'Chime',icon:'star',lines:[{t:'11:00',c:C.WH},{t:'ON THE HOUR',c:C.AMB}]}),
+    'Countdowns':S({label:'Countdown',icon:'star',iconColor:C.AMB,lines:[{t:'MAYA',c:C.AMB},{t:'BDAY IN 6 DAYS',c:C.WH}]},{label:'Countdown',icon:'moon',lines:[{t:'BEACH TRIP',c:C.CY},{t:'IN 12 DAYS',c:C.WH}]}),
+    'Timers & focus timer':S({label:'Focus',lines:[{t:'FOCUS',c:C.AMB},{t:'18:42 LEFT',c:C.WH}]},{label:'Kitchen timer',lines:[{t:'PASTA',c:C.AMB},{t:'8:42 LEFT',c:C.WH}]}),
+    'Wake-up & wind-down light':{m:'wake'},'Sunrise & sunset moments':{m:'wake'},'Sunrise & sunset light':{m:'wake'},
+    'Calendars':S({label:'Next event',icon:'cal',lines:[{t:'TODAY',c:C.AMB},{t:'SOCCER 5:30 - DINNER 6:30',c:C.WH}]}),
+    'Morning briefing':S({label:'Morning',icon:'sun',lines:[{t:'GOOD MORNING',c:C.AMB},{t:'DENTIST 9 AM - 64* SUNNY',c:C.WH}]}),
+    'Today’s games':S({label:'Live',lines:[{t:'NYG 17 Q3'},{t:'PHI 21 4:12'}]},{label:'Final',lines:[{t:'CHA 98 F'},{t:'NYK 94'}]}),
+    'Game Day mode':S({label:'Game Day',icon:'ball',lines:[{t:'PHI 21'},{t:'NYG 17 Q3 4:12'}]}),
+    'Play moments':{m:'td'},'Game-day moments':{m:'td'},'Game-day characters & crowd moments':{m:'td'},
+    'Runs, clutch & upset watch':{m:'three'},'Basketball moments':{m:'three'},'Weather moments':{m:'storm'},
+    'TV delay sync':S({label:'Holding for your TV',lines:[{t:'TV DELAY',c:C.CY},{t:'SCORE IN 0:08',c:C.WH}]}),
+    'Manual scoreboard':S({label:'Your scoreboard',lines:[{t:'BLUE 3',c:'#3D7BFF'},{t:'RED 2',c:C.RED}]}),
+    'Visualizers & live painting':{m:'song',kind:'panel',mode:'both'},
+    'Moments across two displays':{m:'storm',kind:'panel',mode:'both'},
+    'Three-line scoreboard':{s:[{label:'Three-line scoreboard',lines:[{t:'NYG 17'},{t:'PHI 21'},{t:'Q3 4:12',c:C.AMB}]}],kind:'panel'},
+    'Bigger text':{s:[{label:'Bigger text',lines:[{t:'10:42'},{t:'68* CLEAR',c:C.AMB},{t:'TUE',c:C.CY}]}],kind:'panel'},
+    'Lyric + info row':{m:'song',kind:'panel',mode:'panel'},
+    'Sonos & Denon HEOS':S({label:'Now playing',icon:'note',lines:[{t:'LIVING RM',c:C.GRN},{t:'MIDNIGHT DRIVE - THE LOW HOURS',c:'song'}]}),
+    'Any music app':S({label:'Now playing',icon:'note',lines:[{t:'NOW PLAYING',c:C.GRN},{t:'ON REPEAT - LATE SET',c:'song'}]}),
+    'Synced lyrics':{m:'song'},'Sound-reactive light':{m:'song'},
+    'Lyric icons':S({label:'Lyric icon',icon:'heart',lines:[{t:'LOVE',c:'#FF2D55'},{t:'ALL MY LOVE TONIGHT',c:'sung'}]}),
+    'Presence radar':S({label:'Someone walked in',icon:'sun',lines:[{t:'WELCOME IN',c:C.AMB},{t:'68* CLEAR',c:C.CY}]},{label:'Room empty',dim:true,lines:[{t:'10:58'}]}),
+    'Wake & auto-dim':S({label:'Someone walked in',lines:[{t:'WELCOME IN',c:C.AMB},{t:'10:42 PM',c:C.WH}]},{label:'Room empty: dimmed',dim:true,lines:[{t:'10:58'}]}),
+    'House modes':S({label:'Party',lines:[],fx:'viz',hold:3500},{label:'Night',dim:true,lines:[{t:'11:20'}]}),
+    'Loud-sound alert':S({label:'Loud sound',icon:'alert',lines:[{t:'LOUD',c:C.RED},{t:'DOORBELL?',c:C.WH}]}),
+    'Temperature & humidity':S({label:'Inside & out',lines:[{t:'IN 71* 44%',c:C.WH},{t:'OUT 58*',c:C.CY}]})
+  }})();
+  let pvStop=null;
+  function preview(x,name,p,t){
+    if(!x.open){if(x._pv){x._pv.remove();x._pv=null}return}
+    const d=PV[name];if(!d)return;if(pvStop){pvStop();pvStop=null}
+    document.querySelectorAll('#groups .xpv').forEach(e=>e.remove());
+    const kind=d.kind||(t==='N'?'panel':(p.h===22?'panel':'bar'));
+    const w=document.createElement('div');w.className='xpv';w.innerHTML='<div class="bezel"><canvas></canvas></div><span class="xpv-l"></span>';x.querySelector('.xb').prepend(w);x._pv=w;
+    const cv=w.querySelector('canvas'),lab=w.querySelector('.xpv-l');
+    if(d.m&&window.ArxiMoments){const pl=ArxiMoments.player(cv,d.m,{kind,mode:d.mode||kind});lab.textContent=pl?pl.name:'';pvStop=()=>pl&&pl.stop()}
+    else{const mx=ArxiMatrix(cv,{w:44,h:kind==='panel'?22:11,onLabel:l=>{lab.textContent=l}});mx.setScenes(d.s);pvStop=()=>mx.setScenes([])}
+  }
   let scope='mine',cur=null,openGroups=null;
   function renderGroups(p){
     const g=$('groups');
@@ -757,6 +809,7 @@ details.xc.off>summary b{opacity:.5}
         x.innerHTML='<summary><b></b></summary><div class="xb"><p></p><span class="how"></span></div>';
         x.querySelector('b').textContent=n;x.querySelector('p').textContent=desc;
         x.querySelector('.how').textContent=on?'On '+p.name+(t!=='LPN'?' · '+need:''):'Not on '+p.name+' · '+need;
+        if(PV[n])x.classList.add('has-pv');x.addEventListener('toggle',()=>preview(x,n,p,t));
         box.appendChild(x)});
       g.appendChild(d)});
   }
@@ -770,7 +823,7 @@ details.xc.off>summary b{opacity:.5}
     $('p-eyebrow').textContent=p.eyebrow;$('p-name').textContent=p.name;$('p-pitch').textContent=p.pitch;
     $('p-price').textContent='$'+p.price;$('p-note').textContent=p.note;
     $('p-best').innerHTML='<span class="eyebrow">Best for</span>'+p.best.map(b=>'<span class="pill on">'+b+'</span>').join('');
-    $('pm-size').innerHTML=p.h===22?'<b>Panel</b> · three lines of text':'<b>Bar</b> · two lines of text';
+    $('pm-size').innerHTML=p.h===22?'<b>Panel</b> · 13 × 7 in · three lines':'<b>Bar</b> · 13 × 3.5 in · two lines';
     mx.setSize(p.w,p.h);mx.setScenes(p.scenes);
     $('f-title').textContent=p.name+' features';
     renderGroups(p);

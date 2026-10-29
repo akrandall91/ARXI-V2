@@ -98,38 +98,39 @@
 
 <script src="matrix.js"></script>
 <script src="cart.js"></script>
+<script src="moments.js"></script>
 <script>
 (function(){
   const A=window.ARXI,{AMB,CY,WH,RED,GRN}=ArxiMatrix.C,PUR='#B98CFF',LIVE='#FF4D6D',$=id=>document.getElementById(id);
   const SL={now:'Working now',progress:'In progress',build:'We can build it'};
   const W=[
     {id:'sports',name:'Sports fans',line:'Scores, game day and no spoilers.',h:'Never miss a play.',
-     why:'Every game on today, your team front and center, and a display that waits for your TV before it shows the score.',
+     why:'Your team front and center, and no spoilers.',moment:'td',kind:'panel',
      feats:[['Game Day mode','Your favourite team’s game takes over with a running clock.','now'],['TV delay sync','Holds the score until your TV shows the play.','now'],['Play moments','Timeouts, first downs, big plays, crunch time and celebrations.','now'],['Today’s games','NFL, NBA and college football, reset at 4 AM.','now'],['Volt, the ARXI character','Cameos on touchdowns and wins.','progress'],['Team-colour lights','Hue and WLED lights flash your colours on a score.','build']],
      rooms:[['living','Living room','panel','Three-line scoreboard over the TV'],['game','Game room','probar','Moments, icons and the next game']],
      scenes:[{label:'Game Day',icon:'ball',lines:[{t:'PHI 21',c:GRN},{t:'NYG 17',c:CY},{t:'Q3 4:12',c:AMB}]},{label:'Touchdown',lines:[{t:'TOUCHDOWN',c:GRN},{t:'PHI 28',c:WH},{t:'NYG 17 Q4',c:CY}]}]},
     {id:'music',name:'Music lovers',line:'Lyrics and light that move with the song.',h:'See the song.',
-     why:'Synced lyrics, little pictures for the words, and light that moves with the music. The mic measures loudness only.',
+     why:'The words light up as they’re sung. The mic hears loudness only.',moment:'song',kind:'bar',
      feats:[['Synced lyrics','Timed to the song, word by word.','now'],['Lyric icons','122 pictures triggered by the words.','now'],['Sound-reactive light','Moves with the music; loudness only.','now'],['Sonos & Denon HEOS','What your speaker is playing, from any app.','now'],['Mr Ross live painting','A landscape painted during each song.','progress']],
      rooms:[['living','Living room','probar','Lyrics where you listen'],['kitchen','Kitchen','probar','Lyrics while you cook']],
      scenes:[{label:'Synced lyrics',icon:'note',iconColor:PUR,lines:[{t:'LYRICS',c:PUR},{t:'CITY LIGHTS ON THE WATER TONIGHT',c:WH}]},{label:'Lyric icon',icon:'heart',iconColor:LIVE,lines:[{t:'LOVE',c:LIVE},{t:'ALL MY LOVE TONIGHT',c:WH}]}]},
     {id:'families',name:'Families',line:'One board everyone can read.',h:'The family board.',
-     why:'Today’s plans, birthdays, bedtime countdowns and “dinner’s ready” from your phone, readable from across the room.',
+     why:'Plans, birthdays and “dinner’s ready” from your phone.',
      feats:[['Messages from your phone','Send a note and it shows on the display.','now'],['Countdowns & birthdays','Up to eight, repeating every year.','now'],['Timers','Three timers and a stopwatch.','now'],['Wake-up & wind-down light','A gentle morning and bedtime glow.','now'],['House modes','Everyday, Chill and Night in one tap.','now'],['Family calendar','Today’s plans each morning.','progress']],
      rooms:[['kitchen','Kitchen','lite','The family board'],['kids','Kids’ room','lite','Bedtime countdown and a quiet clock']],
      scenes:[{label:'Message',lines:[{t:'MESSAGE',c:GRN},{t:'DINNER\'S READY - COME DOWN',c:WH}]},{label:'Bedtime',icon:'moon',lines:[{t:'BEDTIME',c:AMB},{t:'IN 20 MIN',c:WH}]}]},
     {id:'office',name:'Home office',line:'Focus, time and a do-not-disturb sign.',h:'Stay in the zone.',
-     why:'A focus timer, the time at a glance, and an “on a call” sign the whole house can read.',
+     why:'A focus timer and an “on a call” sign.',
      feats:[['Focus timer','25/5 focus and break presets.','now'],['Show text','“On a call” or “Back at 3” in one tap.','now'],['Clock & weather','Time and conditions at a glance.','now'],['Meeting countdown','From your calendar.','progress'],['Smart brightness','Follows the room light.','progress'],['Stocks & crypto','A ticker of what you follow.','build']],
      rooms:[['office','Home office','probar','Focus timer and status sign']],
      scenes:[{label:'Focus',lines:[{t:'FOCUS',c:AMB},{t:'18:42 LEFT',c:WH}]},{label:'On a call',lines:[{t:'ON A CALL',c:RED},{t:'BACK AT 3',c:WH}]}]},
     {id:'streamers',name:'Streamers',line:'A set that reacts, behind you on camera.',h:'Your stream, lit from behind.',
-     why:'BRB and countdowns from your phone, game-night scores, watch parties that don’t spoil, and a set that moves with the music.',
+     why:'BRB, countdowns and scores, behind you on camera.',
      feats:[['BRB & messages','From your phone, mid-stream.','now'],['Countdowns & break timers','Visible on camera.','now'],['Watch parties','Live scores synced to your broadcast.','now'],['Game-night scoreboard','Your teams, your colours.','now'],['House modes','Party, Chill or Night in one tap.','now'],['Twitch & YouTube alerts','Follows, subs and raids on the wall.','build'],['OBS on-air & overlay','On-air look and an on-stream copy.','build'],['Stream Deck buttons','One key per mode or message.','build']],
      rooms:[['office','Behind you on camera','probar','Text, timers, scores and light'],['office','On your desk','probar','Alerts and timers for you']],
      scenes:[{label:'Starting soon',lines:[{t:'LIVE IN',c:LIVE},{t:'4:59',c:WH}]},{label:'BRB',lines:[{t:'BRB',c:CY},{t:'GRABBING SNACKS - BACK IN 5',c:WH}]}]},
     {id:'calm',name:'Not into tech',line:'No app, no camera, nothing listening.',h:'Simple on purpose.',
-     why:'No app, no voice assistant, no camera. It shows the time and the weather, glows when you walk in, and we set it up for you.',
+     why:'No app, no camera, nothing listening. Just the time and a gentle light.',moment:'wake',kind:'bar',
      feats:[['No app','Settings in any browser, if you ever need them.','now'],['Quiet clock','A big, dim clock at night.','now'],['Wake-up & wind-down light','A gentle glow morning and night.','now'],['Set up your way','Change what it shows anytime from your phone.','now'],['Wakes when you walk in','Fades when the room is empty.','progress']],
      rooms:[['bed','Bedroom','lite','A quiet clock and the morning weather']],
      scenes:[{label:'Morning',icon:'sun',lines:[{t:'6:30',c:AMB},{t:'SUN UP 7:24',c:WH}]},{label:'Night',dim:true,icon:'moon',lines:[{t:'11:20',c:WH}]}]}
@@ -138,14 +139,17 @@
   W.forEach(w=>{const b=document.createElement('button');b.type='button';b.className='pk';b.dataset.id=w.id;b.innerHTML='<b></b><span></span>';
     b.querySelector('b').textContent=w.name;b.querySelector('span').textContent=w.line;b.addEventListener('click',()=>{location.hash=w.id});pk.appendChild(b)});
   const mx=ArxiMatrix($('w-c'),{w:44,h:11,onLabel:t=>{$('w-label').textContent=t}});
-  let cur=null;
+  let cur=null,player=null;
   function itemsOf(w){const it={lite:0,probar:0,panel:0,hub:0};w.rooms.forEach(r=>it[r[2]]++);return it}
   function show(id){
     const w=W.find(x=>x.id===id)||W[0];cur=w;
     pk.querySelectorAll('.pk').forEach(b=>b.setAttribute('aria-pressed',b.dataset.id===w.id?'true':'false'));
     $('w-eye').textContent='For '+w.name.toLowerCase();$('w-h').textContent=w.h;$('w-why').textContent=w.why;
-    const big=w.rooms.some(r=>r[2]==='panel');mx.setSize(44,big?22:11);mx.setScenes(w.scenes);
-    $('w-size').innerHTML=big?'<b>Panel</b> · three lines of text':'<b>Bar</b> · two lines of text';
+    const big=w.moment?w.kind==='panel':w.rooms.some(r=>r[2]==='panel');
+    if(player){player.stop();player=null}
+    if(w.moment&&window.ArxiMoments){mx.setScenes([]);player=ArxiMoments.player($('w-c'),w.moment,{kind:w.kind});$('w-label').textContent=player?player.name:''}
+    else{mx.setSize(44,big?22:11);mx.setScenes(w.scenes)}
+    $('w-size').innerHTML=big?'<b>Panel</b> · 13 × 7 in · three lines':'<b>Bar</b> · 13 × 3.5 in · two lines';
     const f=$('w-feats');f.innerHTML='';
     w.feats.filter(f=>f[2]==='now').forEach(([n,d,st])=>{const x=document.createElement('details');x.className='xc';
       x.innerHTML='<summary><b></b></summary><div class="xb"><p></p><a href="features.html#lite">All features →</a></div>';
