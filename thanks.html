@@ -95,7 +95,7 @@
     let lines=cart.lines;if(!lines.length){try{const l=JSON.parse(localStorage.getItem('arxi-last-order')||'null');if(l&&l.ref===ref)lines=l.lines||[]}catch(e){}}
     if(!lines.length)return;
     const go=()=>{const box=$('lineup');box.hidden=false;
-      const m=window.ArxiLineup&&ArxiLineup(box,{bar:[{label:'Hello',lines:[{t:'THANK YOU',c:'#38F28A'},{t:'SEE YOU SOON',c:'flow'}],icon:'heart',hold:99999}],
+      const m=window.ArxiLineup&&ArxiLineup(box,{bar:[{label:'Hello',lines:[{t:'THANK YOU',c:'#38F28A'},{t:'SEE YOU SOON',c:'song'}],icon:'heart',hold:99999}],
         panel:[{label:'Hello',lines:[{t:'THANK YOU',c:'#38F28A'},{t:'ORDER IN',c:'#F4F1FF'},{t:'SEE YOU',c:'#3FE0FF'}],icon:'heart',hold:99999}]});
       if(!m){box.hidden=true;return}
       m.setItems(lines.map(l=>({kind:l.product==='panel'?'panel':'bar',finish:l.finish||'black'})).sort((a,b)=>a.kind===b.kind?0:a.kind==='panel'?-1:1))};

@@ -1,4 +1,3 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>ARXI Bar & Panel</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -292,7 +291,7 @@ details summary:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
       <div class="sec-head" style="margin-bottom:24px">
         <p class="eyebrow">Full color</p>
         <h2>Any color, pixel by pixel.</h2>
-        <p>A frosted diffuser softens every pixel into smooth, even light, so text reads cleanly from across the room. Each pixel takes its own color: team colors on scores, lyrics that shift with the song, icons in color, and light that moves with the room.</p>
+        <p>A frosted diffuser softens every pixel into smooth, even light, so text reads cleanly from across the room. Each pixel takes its own color: team colors on scores, lyrics in each song's own color, icons in color, and light that moves with the room.</p>
       </div>
       <div class="color-demo">
         <div class="bezel"><canvas id="cmatrix" width="880" height="440" aria-label="Full-color preview on a Panel"></canvas></div>
@@ -442,13 +441,13 @@ details summary:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
         <div class="flow" aria-hidden="true">→</div>
         <div class="col">
           <span class="col-label">Displays</span>
-          <div class="node out"><b>Panel</b><span>Clock, scores, lyrics, the main story</span></div>
-          <div class="node out c"><b>Bar</b><span>Icons, alerts, ticker, sound-reactive light</span></div>
+          <div class="node out"><b>Bar</b><span>The words: the time, the score, the lyrics</span></div>
+          <div class="node out c"><b>Panel</b><span>The picture: the sky, the play, art for the song</span></div>
           <div class="node out c"><b>Next display</b><span>Plug it in. The hub finds it and gives it a role.</span></div>
         </div>
       </div>
 
-      <p style="margin-top:32px"><a class="more" href="connected.html">See the hub in action and every advanced feature →</a></p>
+      <p style="margin-top:32px"><a class="more" href="connected.html#moments">See a touchdown, a storm and a song on one display and on two →</a></p>
     </div>
   </section>
 
@@ -532,20 +531,20 @@ details summary:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
       {label:'Clock & weather',lines:[{t:'10:42 PM',c:C.WH},{t:'68* CLEAR',c:['#FFB04A','#FF4FD8']},{t:DATE,c:C.CY}],icon:'moon'},
       {label:'Today’s games',lines:[{t:'NYG 17 Q3'},{t:'PHI 21 4:12'},{t:'MORE AT 8',c:C.AMB}]},
       {label:'Today’s games',lines:[{t:'CHA 98 F'},{t:'NYK 94'},{t:'FINAL',c:C.AMB}]},
-      {label:'Scrolling message',lines:[{t:'WELCOME',c:'rainbow'},{t:'GAME NIGHT AT 8 - BRING SNACKS',c:C.WH},{t:'TONIGHT 8PM',c:C.PNK}]}
+      {label:'Scrolling message',lines:[{t:'WELCOME',c:C.AMB},{t:'GAME NIGHT AT 8 - BRING SNACKS',c:C.WH},{t:'TONIGHT 8PM',c:C.PNK}]}
     ],
     pro:[
       {label:'Presence: someone walked in',lines:[{t:'WELCOME IN',c:C.AMB},{t:'68* CLEAR',c:C.CY},{t:'EVENING',c:C.VIO}],icon:'sun'},
-      {label:'Sonos now playing',lines:[{t:'LIVING RM',c:C.GRN},{t:'MIDNIGHT DRIVE - THE LOW HOURS',c:'flow'},{t:'VOL 32',c:C.CY}],icon:'note'},
-      {label:'Synced lyrics',lines:[{t:'> LYRICS',c:C.PNK},{t:'CITY LIGHTS ON THE WATER TONIGHT',c:'flow'},{t:'ICON: STAR',c:C.YEL}],icon:'star'},
-      {label:'Sound-reactive light',lines:[],fx:'viz',hold:5200},
+      {label:'Sonos now playing',lines:[{t:'LIVING RM',c:C.GRN},{t:'MIDNIGHT DRIVE - THE LOW HOURS',c:'song'},{t:'VOL 32',c:C.CY}],icon:'note'},
+      {label:'Synced lyrics',lines:[{t:'> LYRICS',c:C.PNK},{t:'CITY LIGHTS ON THE WATER TONIGHT',c:'sung'},{t:'ICON: STAR',c:C.YEL}],icon:'star'},
+      {label:'Sound-reactive light: the style moves with the beat',lines:[],fx:'viz',hold:5200},
       {label:'Night style',lines:[{t:'10:58'}],dim:true}
     ],
     connected:[
       {label:'Hub: 4 games today',lines:[{t:'4 GAMES',c:C.CY},{t:'NEXT 8:15',c:C.AMB},{t:'HUB ONLINE',c:C.GRN}]},
       {label:'Hub → bar: live score',lines:[{t:'DAL 24 Q4'},{t:'WAS 20 1:48'},{t:'LIVE',c:C.RED}]},
-      {label:'Touchdown',lines:[],fx:'burst',hold:3200},
-      {label:'Hub → bar + companion',lines:[{t:'NOW PLAY',c:C.GRN},{t:'COMPANION: ICONS'},{t:'HUB SYNCED',c:C.CY}],icon:'heart'},
+      {label:'Touchdown',lines:[],fx:'burst',team:'DAL',hold:5400},
+      {label:'Hub → Bar + Panel',lines:[{t:'NOW PLAY',c:C.GRN},{t:'PANEL: PICTURES'},{t:'HUB SYNCED',c:C.CY}],icon:'heart'},
       {label:'4 AM rollover',lines:[{t:'NEW DAY',c:C.AMB},{t:'FINALS CLEARED',c:C.CY},{t:'4 AM RESET',c:C.VIO}]}
     ]
   };
@@ -574,14 +573,14 @@ details summary:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
     const pick=document.getElementById('c-pick');
     const DEMO={
       scores:[{label:'Scores in team colors',lines:[{t:'GB 14 Q3'},{t:'DET 17 5:46'},{t:'LIVE',c:C.RED}],hold:4200}],
-      lyrics:[{label:'Lyrics that move through the spectrum',lines:[{t:'> NOW',c:C.PNK},{t:'CITY LIGHTS ON THE WATER TONIGHT',c:'flow'},{t:'THE LOW HOURS',c:C.VIO}],icon:'note'}],
-      sound:[{label:'Sound-reactive light (Pro)',lines:[],fx:'viz',hold:6000}],
+      lyrics:[{label:'Lyrics in the song’s own color, lit word by word',lines:[{t:'> NOW',c:'song'},{t:'CITY LIGHTS ON THE WATER TONIGHT',c:'sung'},{t:'THE LOW HOURS',c:C.VIO}],icon:'note'}],
+      sound:[{label:'Visualizer from the Panel’s own mic (Pro)',lines:[],fx:'viz',hold:6000}],
       icons:[{label:'Icons in color',lines:[{t:'72* SUNNY',c:C.YEL},{t:'RAIN AT 6',c:'#3FA9FF'},{t:'GOODNIGHT',c:'#DDE7FF'}],icon:'sun'},
-             {label:'Icons in color',lines:[{t:'GAME DAY',c:C.ORG},{t:'KICKOFF 1PM',c:C.WH},{t:'GO TEAM',c:'rainbow'}],icon:'ball'},
+             {label:'Icons in color',lines:[{t:'GAME DAY',c:C.ORG},{t:'KICKOFF 1PM',c:C.WH},{t:'GO TEAM',c:'team'}],icon:'ball'},
              {label:'Icons in color',lines:[{t:'HAPPY BDAY',c:C.PNK},{t:'MAYA - 3 DAYS',c:C.WH},{t:'PARTY AT 6',c:C.YEL}],icon:'heart'}],
       mine:[]
     };
-    function mine(){const c=pick.value;return[{label:'Any color you pick',lines:[{t:'10:42',c},{t:'ANY COLOR',c:[c,'#FFFFFF']},{t:'YOU PICK',c}],fx:'wash',fxColors:[c,'#050608'],hold:8000}]}
+    function mine(){const c=pick.value;return[{label:'Screen colors: your color, with a backdrop to match',lines:[{t:'10:42',c},{t:'ANY COLOR',c},{t:'YOU PICK',c}],fx:'wash',fxColors:[c],hold:8000}]}
     function show(k){document.querySelectorAll('#c-chips button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.c===k?'true':'false'));
       document.getElementById('c-pickwrap').hidden=k!=='mine';cm.setScenes(k==='mine'?mine():DEMO[k])}
     document.getElementById('c-chips').addEventListener('click',e=>{const b=e.target.closest('button');if(b)show(b.dataset.c)});
@@ -594,9 +593,9 @@ details summary:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
   if(st){
     const go=()=>{const m=window.ArxiModels&&ArxiModels(st,{
       panel:[{label:'Scores',lines:[{t:'GB 14 Q3'},{t:'DET 17 5:46'},{t:'LIVE',c:C.RED}],hold:5000},{label:'Clock',lines:[{t:'10:42 PM',c:C.WH},{t:'68* CLEAR',c:['#FFB04A','#FF4FD8']},{t:'TUE OCT 28',c:C.CY}],icon:'moon',hold:5000}],
-      bar:[{label:'Synced lyrics',lines:[{t:'> NOW',c:C.PNK},{t:'CITY LIGHTS ON THE WATER TONIGHT',c:'flow'}],icon:'note'},{label:'Sound',lines:[],fx:'viz',hold:5000}]});
+      bar:[{label:'Synced lyrics',lines:[{t:'> NOW',c:'song'},{t:'CITY LIGHTS ON THE WATER TONIGHT',c:'sung'}],icon:'note'},{label:'Sound',lines:[],fx:'viz',hold:5000}]});
       if(!m){document.getElementById('fb3d').hidden=false;return}
-      const xs=document.getElementById('xstage'),x=window.ArxiExploded&&ArxiExploded(xs,{finish:'black',scenes:[{label:'Lyrics',lines:[{t:'> NOW',c:C.PNK},{t:'CITY LIGHTS ON THE WATER TONIGHT',c:'flow'}],icon:'note'},{label:'Scores',lines:[{t:'GB 14 Q3'},{t:'DET 17 5:46'}],hold:4000}]});
+      const xs=document.getElementById('xstage'),x=window.ArxiExploded&&ArxiExploded(xs,{finish:'black',scenes:[{label:'Lyrics',lines:[{t:'> NOW',c:'song'},{t:'CITY LIGHTS ON THE WATER TONIGHT',c:'sung'}],icon:'note'},{label:'Scores',lines:[{t:'GB 14 Q3'},{t:'DET 17 5:46'}],hold:4000}]});
       if(!x)document.getElementById('xfb').hidden=false;
       else{const xb=document.getElementById('xbtn');xb.addEventListener('click',()=>{const apart=x.toggle();xb.setAttribute('aria-pressed',apart?'true':'false');xb.textContent=apart?'Put it back together':'Take it apart'})}
       const notes={both:'Bar for two lines of text. Panel for three, with bigger type.',bar:'ARXI Bar. Slim enough for a shelf, a desk or above the TV.',panel:'ARXI Panel. Twice as tall, for three lines and bigger text.'};
@@ -616,5 +615,3 @@ details summary:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
 </script>
 <script src="cart.js"></script>
 <script src="ui.js"></script>
-
-</body></html>
