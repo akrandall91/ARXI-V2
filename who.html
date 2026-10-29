@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Who ARXI Is For</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="arxi.css">
+<style>
+/* Layout: persona picker (one row of large chips), then one panel: why + live preview, features to tap open, a room-by-room setup with one add-to-cart. */
+.hero{padding-block:44px 28px;border-bottom:0}
+.hero h1{font-size:clamp(36px,8vw,71px);margin-top:12px}
+.hero h1 em{font-style:normal;color:var(--amber)}
+.hero .lede{margin-top:14px}
+.picker{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin-top:28px}
+.pk{all:unset;box-sizing:border-box;cursor:pointer;border:1px solid var(--line);border-radius:6px;padding:14px;display:grid;gap:6px;align-content:start;background:var(--surface);min-width:0}
+.pk:hover{border-color:var(--muted)}
+.pk:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+.pk[aria-pressed="true"]{border-color:var(--amber);background:var(--raised);box-shadow:0 0 0 1px var(--amber) inset}
+.pk b{font-family:var(--display);font-weight:600;font-size:16px;line-height:1}
+.pk span{font-size:13px;color:var(--muted);line-height:1.35}
+
+.panel{padding-block:40px 72px}
+.p-top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:32px;align-items:center}
+.p-top h2{font-size:clamp(30px,6vw,50px)}
+.p-top p{color:var(--muted);font-size:18px;margin-top:14px;max-width:46ch}
+.cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:28px;margin-top:40px;align-items:start}
+.cols h3{font-size:26px;margin-bottom:6px}
+.cols .sub{font-size:14px;color:var(--muted);margin-bottom:12px}
+.xb a{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.06em;text-decoration:none}
+.setup{background:var(--raised);border:1px solid var(--line);border-radius:6px;padding:20px;display:grid;gap:12px}
+.rooms{list-style:none;margin:0;padding:0}
+.rooms li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.rooms li b{font-weight:600}
+.rooms li small{grid-column:1;font-size:13px;color:var(--muted)}
+.rooms li .rp{font-family:var(--mono);font-size:14px;text-align:right;font-variant-numeric:tabular-nums}
+.rooms li a{grid-column:1/-1;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;text-decoration:none;margin-top:4px}
+.tot{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.tot span{font-size:14px;color:var(--muted)}
+.tot b{font-family:var(--display);font-weight:600;font-size:33px;line-height:1}
+.tot s{font-family:var(--mono);font-size:14px;color:var(--muted);margin-left:8px;font-weight:400}
+.added{font-size:13px;color:var(--green)}
+@media (max-width:1000px){.picker{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:860px){.p-top,.cols{grid-template-columns:1fr}}
+@media (max-width:520px){.picker{grid-template-columns:repeat(2,minmax(0,1fr))}}
+</style>
+</head>
+<body>
+<header class="site">
+  <div class="wrap">
+    <a class="mark" href="index.html">ARXI<span>·</span>SYSTEMS</a>
+    <nav aria-label="Site">
+      <a href="index.html">Overview</a><a href="features.html#lite">Features</a><a href="rooms.html">Every room</a><a href="who.html" aria-current="page">Who it's for</a><a href="connected.html">Connected</a><a href="store.html" data-cart>Store</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap">
+      <p class="eyebrow">Who it's for</p>
+      <h1>Made for <em>how you live.</em></h1>
+      <p class="lede">Pick the one that sounds like you. We'll show what you'll use and a setup for each room.</p>
+      <div class="picker" id="picker" role="group" aria-label="Choose who you are"></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="wrap">
+      <div class="p-top">
+        <div><p class="eyebrow" id="w-eye"></p><h2 id="w-h"></h2><p id="w-why"></p></div>
+        <div>
+          <div class="bezel"><canvas id="w-c" width="880" height="220" aria-label="What this looks like on the display"></canvas></div>
+          <div class="bezel-meta"><span id="w-label"></span><span id="w-size"></span></div>
+        </div>
+      </div>
+      <div class="cols">
+        <div>
+          <h3>What you'll use</h3>
+          <p class="sub">Tap any feature for the details.</p>
+          <div id="w-feats"></div>
+        </div>
+        <div class="setup">
+          <h3>Your setup</h3>
+          <p class="sub" style="margin:0" id="w-setup-sub"></p>
+          <ul class="rooms" id="w-rooms"></ul>
+          <div class="tot"><span id="w-deal"></span><b id="w-total"></b></div>
+          <div class="cta-row"><button type="button" class="btn" id="w-add">Add setup to cart</button><a class="btn ghost" href="store.html">Go to store</a></div>
+          <p class="added" id="w-added" hidden></p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site"><div class="wrap"><span>ARXI Systems · ARXI makes</span><span>ARXI · Who it's for</span></div></footer>
+
+<script src="matrix.js"></script>
+<script src="cart.js"></script>
+<script>
+(function(){
+  const A=window.ARXI,{AMB,CY,WH,RED,GRN}=ArxiMatrix.C,PUR='#B98CFF',LIVE='#FF4D6D',$=id=>document.getElementById(id);
+  const SL={now:'Working now',progress:'In progress',build:'We can build it'};
+  const W=[
+    {id:'sports',name:'Sports fans',line:'Scores, game day and no spoilers.',h:'Never miss a play.',
+     why:'Every game on today, your team front and center, and a display that waits for your TV before it shows the score.',
+     feats:[['Game Day mode','Your favourite team’s game takes over with a running clock.','now'],['TV delay sync','Holds the score until your TV shows the play.','now'],['Play moments','Timeouts, first downs, big plays, crunch time and celebrations.','now'],['Today’s games','NFL, NBA and college football, reset at 4 AM.','now'],['Volt, the ARXI character','Cameos on touchdowns and wins.','progress'],['Team-colour lights','Hue and WLED lights flash your colours on a score.','build']],
+     rooms:[['living','Living room','panel','Three-line scoreboard over the TV'],['game','Game room','probar','Moments, icons and the next game']],
+     scenes:[{label:'Game Day',icon:'ball',lines:[{t:'PHI 21',c:GRN},{t:'NYG 17',c:CY},{t:'Q3 4:12',c:AMB}]},{label:'Touchdown',lines:[{t:'TOUCHDOWN',c:GRN},{t:'PHI 28',c:WH},{t:'NYG 17 Q4',c:CY}]}]},
+    {id:'music',name:'Music lovers',line:'Lyrics and light that move with the song.',h:'See the song.',
+     why:'Synced lyrics, little pictures for the words, and light that moves with the music. The mic measures loudness only.',
+     feats:[['Synced lyrics','Timed to the song, word by word.','now'],['Lyric icons','122 pictures triggered by the words.','now'],['Sound-reactive light','Moves with the music; loudness only.','now'],['Sonos & Denon HEOS','What your speaker is playing, from any app.','now'],['Mr Ross live painting','A landscape painted during each song.','progress']],
+     rooms:[['living','Living room','probar','Lyrics where you listen'],['kitchen','Kitchen','probar','Lyrics while you cook']],
+     scenes:[{label:'Synced lyrics',icon:'note',iconColor:PUR,lines:[{t:'LYRICS',c:PUR},{t:'CITY LIGHTS ON THE WATER TONIGHT',c:WH}]},{label:'Lyric icon',icon:'heart',iconColor:LIVE,lines:[{t:'LOVE',c:LIVE},{t:'ALL MY LOVE TONIGHT',c:WH}]}]},
+    {id:'families',name:'Families',line:'One board everyone can read.',h:'The family board.',
+     why:'Today’s plans, birthdays, bedtime countdowns and “dinner’s ready” from your phone, readable from across the room.',
+     feats:[['Messages from your phone','Send a note and it shows on the display.','now'],['Countdowns & birthdays','Up to eight, repeating every year.','now'],['Timers','Three timers and a stopwatch.','now'],['Wake-up & wind-down light','A gentle morning and bedtime glow.','now'],['House modes','Everyday, Chill and Night in one tap.','now'],['Family calendar','Today’s plans each morning.','progress']],
+     rooms:[['kitchen','Kitchen','lite','The family board'],['kids','Kids’ room','lite','Bedtime countdown and a quiet clock']],
+     scenes:[{label:'Message',lines:[{t:'MESSAGE',c:GRN},{t:'DINNER\'S READY - COME DOWN',c:WH}]},{label:'Bedtime',icon:'moon',lines:[{t:'BEDTIME',c:AMB},{t:'IN 20 MIN',c:WH}]}]},
+    {id:'office',name:'Home office',line:'Focus, time and a do-not-disturb sign.',h:'Stay in the zone.',
+     why:'A focus timer, the time at a glance, and an “on a call” sign the whole house can read.',
+     feats:[['Focus timer','25/5 focus and break presets.','now'],['Show text','“On a call” or “Back at 3” in one tap.','now'],['Clock & weather','Time and conditions at a glance.','now'],['Meeting countdown','From your calendar.','progress'],['Smart brightness','Follows the room light.','progress'],['Stocks & crypto','A ticker of what you follow.','build']],
+     rooms:[['office','Home office','probar','Focus timer and status sign']],
+     scenes:[{label:'Focus',lines:[{t:'FOCUS',c:AMB},{t:'18:42 LEFT',c:WH}]},{label:'On a call',lines:[{t:'ON A CALL',c:RED},{t:'BACK AT 3',c:WH}]}]},
+    {id:'streamers',name:'Streamers',line:'A set that reacts, behind you on camera.',h:'Your stream, lit from behind.',
+     why:'BRB and countdowns from your phone, game-night scores, watch parties that don’t spoil, and a set that moves with the music.',
+     feats:[['BRB & messages','From your phone, mid-stream.','now'],['Countdowns & break timers','Visible on camera.','now'],['Watch parties','Live scores synced to your broadcast.','now'],['Game-night scoreboard','Your teams, your colours.','now'],['House modes','Party, Chill or Night in one tap.','now'],['Twitch & YouTube alerts','Follows, subs and raids on the wall.','build'],['OBS on-air & overlay','On-air look and an on-stream copy.','build'],['Stream Deck buttons','One key per mode or message.','build']],
+     rooms:[['office','Behind you on camera','probar','Text, timers, scores and light'],['office','On your desk','probar','Alerts and timers for you']],
+     scenes:[{label:'Starting soon',lines:[{t:'LIVE IN',c:LIVE},{t:'4:59',c:WH}]},{label:'BRB',lines:[{t:'BRB',c:CY},{t:'GRABBING SNACKS - BACK IN 5',c:WH}]}]},
+    {id:'calm',name:'Not into tech',line:'No app, no camera, nothing listening.',h:'Simple on purpose.',
+     why:'No app, no voice assistant, no camera. It shows the time and the weather, glows when you walk in, and we set it up for you.',
+     feats:[['No app','Settings in any browser, if you ever need them.','now'],['Quiet clock','A big, dim clock at night.','now'],['Wake-up & wind-down light','A gentle glow morning and night.','now'],['Set up your way','Change what it shows anytime from your phone.','now'],['Wakes when you walk in','Fades when the room is empty.','progress']],
+     rooms:[['bed','Bedroom','lite','A quiet clock and the morning weather']],
+     scenes:[{label:'Morning',icon:'sun',lines:[{t:'6:30',c:AMB},{t:'SUN UP 7:24',c:WH}]},{label:'Night',dim:true,icon:'moon',lines:[{t:'11:20',c:WH}]}]}
+  ];
+  const pk=$('picker');
+  W.forEach(w=>{const b=document.createElement('button');b.type='button';b.className='pk';b.dataset.id=w.id;b.innerHTML='<b></b><span></span>';
+    b.querySelector('b').textContent=w.name;b.querySelector('span').textContent=w.line;b.addEventListener('click',()=>{location.hash=w.id});pk.appendChild(b)});
+  const mx=ArxiMatrix($('w-c'),{w:44,h:11,onLabel:t=>{$('w-label').textContent=t}});
+  let cur=null;
+  function itemsOf(w){const it={lite:0,probar:0,panel:0,hub:0};w.rooms.forEach(r=>it[r[2]]++);return it}
+  function show(id){
+    const w=W.find(x=>x.id===id)||W[0];cur=w;
+    pk.querySelectorAll('.pk').forEach(b=>b.setAttribute('aria-pressed',b.dataset.id===w.id?'true':'false'));
+    $('w-eye').textContent='For '+w.name.toLowerCase();$('w-h').textContent=w.h;$('w-why').textContent=w.why;
+    const big=w.rooms.some(r=>r[2]==='panel');mx.setSize(44,big?22:11);mx.setScenes(w.scenes);
+    $('w-size').innerHTML=big?'<b>Panel</b> · three lines of text':'<b>Bar</b> · two lines of text';
+    const f=$('w-feats');f.innerHTML='';
+    w.feats.filter(f=>f[2]==='now').forEach(([n,d,st])=>{const x=document.createElement('details');x.className='xc';
+      x.innerHTML='<summary><b></b></summary><div class="xb"><p></p><a href="features.html#lite">All features →</a></div>';
+      x.querySelector('b').textContent=n;x.querySelector('p').textContent=d;f.appendChild(x)});
+    const ul=$('w-rooms');ul.innerHTML='';
+    w.rooms.forEach(([rid,rn,prod,why])=>{const p=A.PROD[prod],li=document.createElement('li');
+      li.innerHTML='<b></b><span class="rp">'+A.fmt(p.price)+'</span><small></small><a href="rooms.html#'+rid+'">Preview this room →</a>';
+      li.querySelector('b').textContent=rn+' · '+p.name;li.querySelector('small').textContent=why;ul.appendChild(li)});
+    const pr=A.price({lines:w.rooms.map(r=>({room:r[1],product:r[2]})),hub:0,owns:false,code:''});
+    $('w-setup-sub').textContent=w.rooms.length>1?'Two displays, connected with the hub included.':'One display. Add a second any time and they connect.';
+    $('w-deal').textContent=pr.save>0?pr.deal:'Starting price';
+    $('w-total').innerHTML=A.fmt(pr.total)+(pr.save>0?'<s>'+A.fmt(pr.reg)+'</s>':'');
+    $('w-added').hidden=true;
+  }
+  $('w-add').addEventListener('click',()=>{A.add(cur.rooms.map(r=>({room:r[1],product:r[2]})));const a=$('w-added');a.hidden=false;a.innerHTML='Added to your cart. <a href="store.html">Review it in the store →</a>'});
+  const route=()=>show((location.hash||'#sports').slice(1));
+  window.addEventListener('hashchange',route);route();
+})();
+</script>
+</body>
+</html>

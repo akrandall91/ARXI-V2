@@ -1,0 +1,620 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>ARXI Bar & Panel</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one dark room, lit by the product. Hero = live 44x11 matrix; then lineup, compare, system map, quote. */
+:root{
+  --bg:#F7F8FA; --surface:#FFFFFF; --raised:#F0F2F5; --line:#E2E5EA;
+  --fg:#0D1117; --muted:#5A6472;
+  --amber:#1F4FE0; --amber-dim:#C7D3FA; --cyan:#0B7F7B; --led-off:#E9ECF0; --red:#D92D20; --green:#13804A; --on-accent:#FFFFFF;
+  --display:"Geist",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --body:"Geist",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"Geist Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:1080px;margin:0 auto}
+a{color:var(--amber)}
+a:focus-visible,button:focus-visible{outline:2px solid var(--amber);outline-offset:3px}
+h1,h2,h3{font-family:var(--display);font-weight:600;letter-spacing:-.03em;line-height:1.05;text-wrap:balance;margin:0}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+p{margin:0}
+
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+header .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-block:14px;flex-wrap:wrap}
+.mark{font-family:var(--display);font-weight:600;font-size:16px;letter-spacing:.08em;color:var(--fg);text-decoration:none}
+.mark span{color:var(--amber)}
+nav{display:flex;gap:18px;flex-wrap:wrap}
+nav a{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-decoration:none}
+nav a:hover{color:var(--fg)}
+
+section{padding-block:72px;border-bottom:1px solid var(--line)}
+.hero{padding-block:56px 64px}
+.hero-grid{display:grid;gap:40px}
+.hero h1{font-size:clamp(38px,9vw,83px)}
+.hero h1 em{font-style:normal;color:var(--amber)}
+.lede{font-size:clamp(17px,2vw,20px);color:var(--muted);max-width:56ch;margin-top:20px}
+.lede strong{color:var(--fg);font-weight:500}
+
+.bezel{background:#050608;border:1px solid var(--line);border-radius:6px;padding:clamp(10px,2vw,22px);box-shadow:0 24px 60px -30px rgba(13,17,23,.35)}
+.bezel canvas{display:block;width:100%;height:auto}
+.bezel-meta{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:12px;font-family:var(--mono);font-size:12px;color:var(--muted)}
+.bezel-meta b{color:var(--fg);font-weight:500}
+
+.tabs{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:4px;margin-top:20px;gap:4px;flex-wrap:wrap}
+.tabs button{font:500 13px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:none;border:0;border-radius:999px;padding:8px 16px;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--amber);color:#FFFFFF}
+.tabs button:hover:not([aria-selected="true"]){color:var(--fg)}
+
+.sec-head{display:grid;gap:14px;margin-bottom:40px;max-width:640px}
+.sec-head h2{font-size:clamp(28px,6vw,47px)}
+.sec-head p{color:var(--muted)}
+
+.tiers{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
+.tier{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:28px;display:flex;flex-direction:column;gap:18px;min-width:0}
+.tier.feature{border-color:var(--amber-dim)}
+.tier-top{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.tier h3{font-size:44px}
+.tier h3 small{display:block;font-family:var(--mono);font-size:12px;font-weight:400;letter-spacing:.12em;color:var(--muted);margin-bottom:8px}
+.pill{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--line);border-radius:999px;padding:3px 10px;color:var(--muted);white-space:nowrap}
+.tier.feature .pill{border-color:var(--amber);color:var(--amber)}
+.tier .pitch{color:var(--fg)}
+.tier ul{list-style:none;margin:0;padding:0;display:grid;gap:10px;font-size:15px;color:var(--muted)}
+.tier li{display:grid;grid-template-columns:14px 1fr;gap:10px}
+.tier li::before{content:"";width:6px;height:6px;margin-top:9px;border-radius:50%;background:var(--amber);box-shadow:0 0 8px var(--amber)}
+.tier li.up::before{background:var(--cyan);box-shadow:0 0 8px var(--cyan)}
+.spec{margin-top:auto;padding-top:16px;border-top:1px dashed var(--line);font-family:var(--mono);font-size:12px;color:var(--muted);display:grid;gap:4px}
+.spec b{color:var(--fg);font-weight:500}
+
+.table-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:4px}
+table{width:100%;border-collapse:collapse;min-width:560px;font-size:15px}
+th,td{padding:14px 18px;text-align:left;border-bottom:1px solid var(--line)}
+thead th{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:500;background:var(--surface)}
+tbody th{font-weight:500}
+tbody tr:last-child>*{border-bottom:0}
+td{text-align:center;color:var(--muted);font-family:var(--mono);font-size:13px}
+thead th:not(:first-child){text-align:center}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--amber);box-shadow:0 0 10px var(--amber)}
+.dot.c{background:var(--cyan);box-shadow:0 0 10px var(--cyan)}
+.no{color:var(--line)}
+.group th{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);background:var(--bg);padding-block:10px}
+
+.map{display:grid;grid-template-columns:1fr auto 1.1fr auto 1fr;align-items:center;gap:16px}
+.col{display:grid;gap:12px;min-width:0}
+.col-label{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.node{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:14px 16px}
+.node b{display:block;font-weight:600}
+.node span{font-size:14px;color:var(--muted)}
+.hub{border-color:var(--cyan);background:var(--raised);padding:24px;text-align:center}
+.hub b{font-family:var(--display);font-size:24px;letter-spacing:.02em;font-weight:600}
+.hub span{display:block;margin-top:6px}
+.flow{font-family:var(--mono);color:var(--cyan);font-size:20px;text-align:center}
+.node.out{border-left:3px solid var(--amber)}
+.node.out.c{border-left-color:var(--cyan)}
+.map-notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:24px;margin-top:40px}
+.map-notes h3{font-size:24px;margin-bottom:8px}
+.map-notes p{color:var(--muted);font-size:15px}
+
+.calm{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:32px}
+.calm div{display:grid;gap:8px;align-content:start}
+.calm h3{font-size:26px}
+.calm p{color:var(--muted);font-size:15px}
+
+.quote{display:grid;gap:28px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));align-items:end}
+.quote h2{font-size:clamp(30px,7vw,59px)}
+.quote h2 em{font-style:normal;color:var(--amber)}
+.contact{display:grid;gap:12px}
+.contact-row{display:flex;justify-content:space-between;align-items:center;gap:12px;border:1px solid var(--line);border-radius:4px;padding:14px 16px;background:var(--surface);flex-wrap:wrap}
+.contact-row code{font-family:var(--mono);font-size:15px;color:var(--fg);user-select:all}
+.contact-row button{font:500 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;background:none;border:1px solid var(--line);color:var(--muted);border-radius:999px;padding:6px 12px;cursor:pointer}
+.contact-row button:hover{color:var(--fg);border-color:var(--muted)}
+footer{padding-block:28px;font-family:var(--mono);font-size:12px;color:var(--muted)}
+footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+
+.base{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 24px;border:0;padding:0;min-width:0}
+.base legend{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;padding:0}
+.base label{position:relative;cursor:pointer}
+.base input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.base span{display:block;font:500 13px var(--mono);letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--line);border-radius:999px;padding:9px 18px;color:var(--muted)}
+.base input:checked+span{background:var(--amber);border-color:var(--amber);color:#FFFFFF}
+.base input:focus-visible+span{outline:2px solid var(--amber);outline-offset:3px}
+.opts{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.opt{position:relative;display:grid;grid-template-columns:1fr auto;gap:12px;align-items:start;background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:18px;cursor:pointer;transition:border-color .15s,background .15s;min-width:0}
+.opt input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.opt:hover{border-color:var(--muted)}
+.opt:has(input:checked){border-color:var(--amber);background:var(--raised)}
+.opt:has(input:focus-visible){outline:2px solid var(--amber);outline-offset:3px}
+.opt.locked{opacity:.42;cursor:not-allowed}
+.opt.locked input{cursor:not-allowed}
+.opt-body{display:grid;gap:8px;min-width:0}
+.opt-top{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.opt-top b{font-weight:600}
+.tag{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--cyan)}
+.opt-desc{font-size:14px;color:var(--muted)}
+.opt-req{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--muted)}
+.opt.locked .opt-req{color:var(--amber)}
+.box{width:22px;height:22px;border:1px solid var(--line);border-radius:50%;display:grid;place-items:center;margin-top:1px}
+.box::after{content:"";width:10px;height:10px;border-radius:50%;background:transparent}
+.opt:has(input:checked) .box{border-color:var(--amber)}
+.opt:has(input:checked) .box::after{background:var(--amber);box-shadow:0 0 10px var(--amber)}
+.build{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-top:24px;padding:20px;border:1px dashed var(--amber-dim);border-radius:4px}
+.build>div{display:grid;gap:4px;min-width:0}
+#build-text{font-family:var(--display);font-weight:600;font-size:22px;letter-spacing:.02em}
+#build-list{font-size:14px;color:var(--muted)}
+#copy-build{font:500 13px var(--mono);letter-spacing:.08em;text-transform:uppercase;background:var(--amber);color:#FFFFFF;border:0;border-radius:999px;padding:12px 20px;cursor:pointer}
+#copy-build:hover{filter:brightness(1.08)}
+.bdg{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;border-radius:999px;padding:2px 8px;border:1px solid var(--line);color:var(--muted)}
+.bdg::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.bdg.now{color:#7BE38A;border-color:#BFE5CC}
+.bdg.progress{color:var(--cyan);border-color:#BFE3E1}
+.bdg.build{color:var(--amber);border-color:var(--amber-dim);border-style:dashed}
+.bdg.build::before{background:none;border:1px solid currentColor}
+a[data-cart].has::after{content:attr(data-count);margin-left:6px;font-size:10px;background:var(--amber);color:#FFFFFF;border-radius:999px;padding:1px 6px;letter-spacing:0}
+.more{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--amber);text-decoration:none}
+.more:hover{text-decoration:underline}
+.rooms-band{background:var(--surface)}
+.rooms-band-in{display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap}
+.rooms-band-in>div{display:grid;gap:12px;max-width:560px;min-width:0}
+.rooms-band h2{font-size:clamp(25px,5vw,38px)}
+.rooms-band p:not(.eyebrow){color:var(--muted)}
+.btn{display:inline-block;font:500 13px var(--mono);letter-spacing:.08em;text-transform:uppercase;background:var(--amber);color:#FFFFFF;border-radius:999px;padding:13px 22px;text-decoration:none}
+.btn:hover{filter:brightness(1.08)}
+.tabs button:disabled{opacity:.35;cursor:not-allowed}
+.tab-row{display:flex;gap:12px;flex-wrap:wrap}
+.base input:disabled+span{opacity:.35;cursor:not-allowed}
+.from{font-family:var(--mono);font-size:13px;color:var(--muted)}
+.from b{font-family:var(--display);font-size:22px;font-weight:600;color:var(--amber);margin-right:4px}
+.bp{font-family:var(--mono);font-size:13px;color:var(--amber)}
+.sub{font-size:26px;margin:0 0 16px}
+.sub-gap{margin-top:44px}
+.prices{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}
+.price{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:22px;display:grid;gap:10px;align-content:start;min-width:0}
+.price.best{border-color:var(--amber-dim);background:var(--raised)}
+.price-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.price-top b{font-weight:600;font-size:17px}
+.price .size{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.price .amt{font-family:var(--display);font-weight:600;font-size:33px;line-height:1;color:var(--fg);font-variant-numeric:tabular-nums}
+.price .amt s{font-family:var(--mono);font-size:14px;font-weight:400;color:var(--muted);margin-left:10px}
+.price p{font-size:14px;color:var(--muted)}
+.save{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#FFFFFF;background:var(--amber);border-radius:999px;padding:3px 10px;justify-self:start}
+.price-note{margin-top:20px;font-size:14px;color:var(--muted)}
+.price-note b{color:var(--fg);font-weight:500}
+.base label:has(input:disabled){display:none}
+.opt-desc{display:none}
+.opt:has(input:checked) .opt-desc{display:block}
+.opt .bdg{margin-left:auto}
+details.tdet{border-top:1px dashed var(--line);padding-top:12px;margin-top:auto}
+details.tdet>summary{cursor:pointer;list-style:none;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--fg);display:flex;justify-content:space-between}
+details.tdet>summary::-webkit-details-marker{display:none}
+details.tdet>summary::after{content:"+";color:var(--amber)}
+details.tdet[open]>summary::after{content:"\2013"}
+details.tdet ul{margin-top:14px}
+details.tdet .spec{margin-top:14px}
+details.acc{border:1px solid var(--line);border-radius:4px;background:var(--surface)}
+details.acc>summary{cursor:pointer;list-style:none;padding:16px 18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+details.acc>summary::-webkit-details-marker{display:none}
+details.acc>summary .t{font-family:var(--display);font-weight:600;font-size:18px;line-height:1}
+details.acc>summary .meta{font-family:var(--mono);font-size:12px;color:var(--muted)}
+details.acc>summary::after{content:"+";margin-left:auto;font-family:var(--mono);font-size:20px;color:var(--amber)}
+details.acc[open]>summary::after{content:"\2013"}
+details.acc>summary:hover{background:var(--raised)}
+details summary:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+.acc-body{padding:4px 18px 18px}
+.tabbar{margin-bottom:20px}
+.tabbar button{font:500 13px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:none;border:0;border-radius:999px;padding:8px 16px;cursor:pointer}
+.tabbar [aria-selected="true"]{background:var(--amber);color:#FFFFFF}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:4px;gap:4px;flex-wrap:wrap}
+#compare{padding-block:40px}
+@media (min-width:900px){ .hero-grid{grid-template-columns:1fr} }
+@media (max-width:820px){
+  .map{grid-template-columns:1fr}
+  .flow{transform:rotate(90deg)}
+  section{padding-block:56px}
+}
+/* Real photos */
+/* full colour */
+.color-demo{max-width:820px}
+.cchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.cchips button{font:500 13px var(--body);border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:7px 14px;cursor:pointer}
+.cchips button[aria-pressed="true"]{border-color:var(--amber);background:var(--amber);color:#fff}
+.cchips .sw{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:-1px;background:conic-gradient(#FF3B5C,#FFE14D,#38F28A,#3FE0FF,#8B5CFF,#FF4FD8,#FF3B5C)}
+.pickwrap{display:flex;align-items:center;gap:10px;margin-top:12px;font-size:14px;color:var(--muted)}
+.pickwrap input{width:44px;height:32px;border:1px solid var(--line);border-radius:8px;padding:2px;background:var(--surface)}
+.cstats{display:grid;gap:12px}
+.cstat{border:1px solid var(--line);border-radius:10px;padding:16px 18px;background:var(--surface)}
+.cstat b{display:block;font:600 30px/1.1 var(--display);letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.cstat b.rgbtxt{background:linear-gradient(90deg,#FF3B5C,#FF7A1A,#E0B000,#13A35A,#0B9CC2,#5B4BFF,#D63AC4);-webkit-background-clip:text;background-clip:text;color:transparent}
+.cstat span{font-size:14px;color:var(--muted)}
+@media (max-width:860px){.color-grid{grid-template-columns:1fr}.cstats{grid-template-columns:repeat(3,minmax(0,1fr))}.cstat b{font-size:22px}}
+@media (max-width:520px){.cstats{grid-template-columns:1fr}}
+.stage3d{position:relative;aspect-ratio:16/7;min-height:260px;border-radius:14px;overflow:hidden;background:radial-gradient(120% 90% at 50% 30%,#FFFFFF 0%,#EEF1F5 55%,#E2E6EC 100%);border:1px solid var(--line)}
+.stage3d .fallback[hidden]{display:none}
+.xstage{aspect-ratio:16/8}
+.xlabel{position:absolute;left:0;top:0;pointer-events:none;white-space:nowrap;font:500 12px var(--mono);letter-spacing:.04em;color:var(--fg);background:rgba(255,255,255,.88);border:1px solid var(--line);border-radius:999px;padding:4px 10px;opacity:0;will-change:transform}
+.xbtn{font:500 14px var(--body);border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:8px 16px;cursor:pointer}
+.xbtn[aria-pressed="true"]{border-color:var(--amber);color:var(--amber)}
+@media (max-width:620px){.xstage{aspect-ratio:4/3}.xlabel{font-size:10px;padding:3px 7px}}
+.stage3d .fallback{position:absolute;inset:0;display:grid;place-items:center;padding:24px;text-align:center;color:var(--muted);font-size:15px}
+.hw-row{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;margin-top:14px}
+.seg3{display:inline-flex;background:var(--raised);border-radius:999px;padding:3px;gap:2px}
+.seg3 button{font:500 13px var(--body);color:var(--muted);background:none;border:0;border-radius:999px;padding:7px 16px;cursor:pointer}
+.seg3 button[hidden]{display:none}
+.seg3 button[aria-pressed="true"]{background:var(--surface);color:var(--fg);box-shadow:0 1px 2px rgba(13,17,23,.12)}
+.hw-note{margin:0;color:var(--muted);font-size:15px}
+@media (max-width:620px){.stage3d{aspect-ratio:4/3}}
+</style>
+
+<header>
+  <div class="wrap">
+    <a class="mark" href="#top">ARXI<span>·</span>SYSTEMS</a>
+    <nav aria-label="Page sections">
+      <a href="index.html" aria-current="page">Overview</a><a href="features.html#lite">Features</a><a href="rooms.html">Every room</a><a href="who.html">Who it's for</a><a href="connected.html">Connected</a><a href="store.html" data-cart>Store</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <p class="eyebrow">ARXI Bar &amp; Panel · Full-color home displays</p>
+        <h1 style="margin-top:14px">The room <em>knows</em><br>the score.</h1>
+        <p class="lede">A strip of full-color light for the wall above your bar or TV. It shows the time, the weather, tonight's games and the words to what's playing, then gets out of the way. <strong>No screen to stare at, no app to learn, no camera.</strong></p>
+      </div>
+      <div>
+        <div class="bezel">
+          <canvas id="matrix" width="880" height="220" aria-label="Live preview of the ARXI LED display"></canvas>
+        </div>
+        <div class="bezel-meta">
+          <span id="scene-label">Clock &amp; weather</span>
+          <span id="size-meta"><b>Bar</b> · two lines of text</span>
+        </div>
+        <div class="tab-row"><div class="tabs" role="tablist" aria-label="Preview a tier">
+          <button role="tab" id="t-lite" aria-selected="true" data-tier="lite">Lite</button>
+          <button role="tab" id="t-pro" aria-selected="false" data-tier="pro">Pro</button>
+          <button role="tab" id="t-con" aria-selected="false" data-tier="connected">Connected</button>
+        </div>
+        <div class="tabs" role="tablist" aria-label="Preview a size">
+          <button role="tab" id="s-bar" aria-selected="true" data-size="bar">Bar</button>
+          <button role="tab" id="s-panel" aria-selected="false" data-size="panel" disabled>Panel</button>
+        </div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="color">
+    <div class="wrap">
+      <div class="sec-head" style="margin-bottom:24px">
+        <p class="eyebrow">Full color</p>
+        <h2>Any color, pixel by pixel.</h2>
+        <p>A frosted diffuser softens every pixel into smooth, even light, so text reads cleanly from across the room. Each pixel takes its own color: team colors on scores, lyrics that shift with the song, icons in color, and light that moves with the room.</p>
+      </div>
+      <div class="color-demo">
+        <div class="bezel"><canvas id="cmatrix" width="880" height="440" aria-label="Full-color preview on a Panel"></canvas></div>
+        <div class="bezel-meta"><span id="c-label"></span><span><b>Panel</b></span></div>
+        <div class="cchips" id="c-chips" role="group" aria-label="Show on the display">
+          <button type="button" data-c="scores">Scores</button>
+          <button type="button" data-c="lyrics">Lyrics</button>
+          <button type="button" data-c="sound">Sound-reactive</button>
+          <button type="button" data-c="icons">Icons</button>
+          <button type="button" data-c="mine"><span class="sw" aria-hidden="true"></span>Your color</button>
+        </div>
+        <div class="pickwrap" id="c-pickwrap" hidden><input type="color" id="c-pick" value="#21D4FD" aria-label="Pick a color"> Pick any color to see it on the display.</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="hardware">
+    <div class="wrap">
+      <div class="sec-head" style="margin-bottom:20px">
+        <p class="eyebrow">The hardware</p>
+        <h2>The Bar and the Panel.</h2>
+        <p>A slim frame in black or white, with a frosted face. Drag to turn them.</p>
+      </div>
+      <div class="stage3d" id="stage3d"><div class="fallback" id="fb3d" hidden>Your browser can’t show the 3D view. The live previews above show what each display looks like.</div></div>
+      <div class="hw-row">
+        <div class="seg3" role="group" aria-label="Show">
+          <button type="button" data-m="both" aria-pressed="true">Both</button>
+          <button type="button" data-m="bar" aria-pressed="false">Bar</button>
+          <button type="button" data-m="panel" aria-pressed="false">Panel</button>
+        </div>
+        <div class="seg3" role="group" aria-label="Finish" id="fin3">
+          <button type="button" data-f="mix" aria-pressed="true">Black + white</button>
+          <button type="button" data-f="black" aria-pressed="false">Black</button>
+          <button type="button" data-f="white" aria-pressed="false">White</button>
+        </div>
+        <p class="hw-note" id="hw-note">Bar for two lines of text. Panel for three, with bigger type.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="lineup">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="eyebrow">The lineup</p>
+        <h2>Start with one Bar. Grow into the whole house.</h2>
+        <p>Choose Lite or Pro, and the slim Bar or the taller Panel, which fits three lines of text. Buy two or more for your house and they connect into one system, with the hub included.</p>
+      </div>
+      <div class="tiers">
+        <article class="tier">
+          <div class="tier-top"><h3><small>Tier 01</small>Lite</h3><span class="pill">Display</span></div>
+          <p class="pitch">The essentials on a glowing strip. Plug it in, join it to Wi-Fi, done.</p>
+          <p class="from">From <b>$159</b> Bar only</p>
+          <a class="more" href="features.html#lite">Full Lite features →</a>
+          <details class="tdet"><summary>What’s included</summary>
+          <ul>
+            <li>Clock with auto brightness for day and night</li>
+            <li>Local weather and temperature</li>
+            <li>Today's games across the NFL, NBA and college football, with live scores at game time</li>
+            <li>Custom scrolling messages</li>
+            <li>Settings page in any browser on your home network</li>
+          </ul>
+          <div class="spec"><span><b>Display</b> Bar, two lines of text</span><span><b>Brain</b> ESP32 · Wi-Fi</span><span><b>Sensors</b> None</span></div>
+          </details>
+        </article>
+
+        <article class="tier feature">
+          <div class="tier-top"><h3><small>Tier 02</small>Pro</h3><span class="pill">Most popular</span></div>
+          <p class="pitch">Everything in Lite, plus a bar that notices when you walk in and follows your music.</p>
+          <p class="from">From <b>$249</b> Panel $299</p>
+          <a class="more" href="features.html#pro-bar">Pro Bar &amp; Panel features →</a>
+          <details class="tdet"><summary>What’s included</summary>
+          <ul>
+            <li class="up">Senses when someone is in the room with mmWave presence radar</li>
+            <li class="up">Now playing and synced lyrics from your Sonos or Denon HEOS speaker, from any app</li>
+            <li class="up">Lyric icons that pop up on matching words</li>
+            <li class="up">Room light sensor for brightness that follows the room</li>
+            <li class="up">Sound-reactive light that moves with the music</li>
+          </ul>
+          <div class="spec"><span><b>Display</b> Bar, or the taller Panel</span><span><b>Sensors</b> mmWave radar, room light, sound-level mic</span><span><b>Music</b> Sonos or Denon HEOS on your network</span></div>
+          </details>
+        </article>
+
+        <article class="tier">
+          <div class="tier-top"><h3><small>2+ displays</small>Connected</h3><span class="pill">Unlocks at two</span></div>
+          <p class="pitch">Buy two or more and your displays connect. The included hub runs them as one system, each showing something different.</p>
+          <p class="from">From <b>$299</b> two Lite Bars, hub included · hub alone $49</p>
+          <a class="more" href="connected.html">Connected &amp; advanced features →</a>
+          <details class="tdet"><summary>What’s included</summary>
+          <ul>
+            <li class="up">Any mix of Lite Bars, Pro Bars and Panels, each with its own role</li>
+            <li class="up">One hub fetches scores, weather and lyrics once, then feeds every display</li>
+            <li class="up">Displays share a theme but split the work instead of repeating each other</li>
+            <li class="up">Gameday dashboard on any screen in the house, synced with the bars</li>
+            <li class="up">Add more displays over time</li>
+          </ul>
+          <div class="spec"><span><b>Hub</b> Included with 2+ displays, or $49 on its own</span><span><b>Displays</b> Any 2 or more Bars and Panels</span><span><b>Dashboard</b> Gameday, in the browser</span></div>
+          </details>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="compare">
+    <div class="wrap">
+      <details class="acc"><summary><span class="t">Compare Lite, Pro and Connected</span><span class="meta">Side by side</span></summary><div class="acc-body"><div class="table-scroll">
+        <table>
+          <thead><tr><th scope="col">Feature</th><th scope="col">Lite</th><th scope="col">Pro</th><th scope="col">Connected</th></tr></thead>
+          <tbody>
+            <tr class="group"><th colspan="4" scope="colgroup">On the display</th></tr>
+            <tr><th scope="row">Clock, weather, messages</th><td><span class="dot" aria-label="Included"></span></td><td><span class="dot" aria-label="Included"></span></td><td><span class="dot" aria-label="Included"></span></td></tr>
+            <tr><th scope="row">Today's games &amp; live scores</th><td><span class="dot" aria-label="Included"></span></td><td><span class="dot" aria-label="Included"></span></td><td><span class="dot" aria-label="Included"></span></td></tr>
+            <tr><th scope="row">Sonos &amp; HEOS now playing + synced lyrics</th><td class="no" aria-label="Not included">—</td><td><span class="dot" aria-label="Included"></span></td><td><span class="dot" aria-label="Included"></span></td></tr>
+            <tr><th scope="row">Lyric keyword icons</th><td class="no" aria-label="Not included">—</td><td><span class="dot" aria-label="Included"></span></td><td><span class="dot" aria-label="Included"></span></td></tr>
+            <tr class="group"><th colspan="4" scope="colgroup">In the room</th></tr>
+            <tr><th scope="row">Presence radar</th><td class="no" aria-label="Not included">—</td><td><span class="dot" aria-label="Included"></span></td><td><span class="dot" aria-label="Included"></span></td></tr>
+            <tr><th scope="row">Room light sensor</th><td class="no" aria-label="Not included">—</td><td><span class="dot" aria-label="Included"></span></td><td><span class="dot" aria-label="Included"></span></td></tr>
+            <tr><th scope="row">Sound-reactive mode</th><td class="no" aria-label="Not included">—</td><td><span class="dot" aria-label="Included"></span></td><td><span class="dot" aria-label="Included"></span></td></tr>
+            <tr class="group"><th colspan="4" scope="colgroup">System</th></tr>
+            <tr><th scope="row">Displays</th><td>1</td><td>1</td><td>2+</td></tr>
+            <tr><th scope="row">Display size</th><td>Bar</td><td>Bar or Panel</td><td>Any mix</td></tr>
+            <tr><th scope="row">Hub, included</th><td class="no" aria-label="Not included">—</td><td class="no" aria-label="Not included">—</td><td><span class="dot c" aria-label="Included"></span></td></tr>
+            <tr><th scope="row">Gameday dashboard sync</th><td class="no" aria-label="Not included">—</td><td class="no" aria-label="Not included">—</td><td><span class="dot c" aria-label="Included"></span></td></tr>
+          </tbody>
+        </table>
+      </div></div></details>
+    </div>
+  </section>
+
+  <section id="connected">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="eyebrow">Connected devices</p>
+        <h2>One hub. Every display in sync.</h2>
+        <p>Two or more ARXI displays in one house connect automatically. The hub finds each one on your Wi-Fi by itself, no pairing, and the displays stop doing their own homework. The hub gathers everything once and hands each panel only what it needs to show.</p>
+      </div>
+
+      <div class="map">
+        <div class="col">
+          <span class="col-label">Sources</span>
+          <div class="node"><b>Gameday dashboard</b><span>Today's games, parsed in the browser</span></div>
+          <div class="node"><b>Sonos &amp; HEOS</b><span>What's playing, on your network</span></div>
+          <div class="node"><b>Weather &amp; lyrics</b><span>Forecast and synced lyric timing</span></div>
+          <div class="node"><b>Room sensors</b><span>Presence, room light, sound level</span></div>
+        </div>
+        <div class="flow" aria-hidden="true">→</div>
+        <div class="node hub"><b>ARXI Hub</b><span>Dedicated ESP32. Collects, decides, sends. Reports back to the dashboard.</span></div>
+        <div class="flow" aria-hidden="true">→</div>
+        <div class="col">
+          <span class="col-label">Displays</span>
+          <div class="node out"><b>Panel</b><span>Clock, scores, lyrics, the main story</span></div>
+          <div class="node out c"><b>Bar</b><span>Icons, alerts, ticker, sound-reactive light</span></div>
+          <div class="node out c"><b>Next display</b><span>Plug it in. The hub finds it and gives it a role.</span></div>
+        </div>
+      </div>
+
+      <p style="margin-top:32px"><a class="more" href="connected.html">See the hub in action and every advanced feature →</a></p>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="eyebrow">Made for people who don't love gadgets</p>
+        <h2>Smart, without the smart-home homework</h2>
+      </div>
+      <div class="calm">
+        <div><h3>Nothing to talk to</h3><p>There's no voice assistant and no camera. The built-in mic only measures how loud the room is, to drive the sound-reactive light. It doesn't listen for words or record anything.</p></div>
+        <div><h3>No app</h3><p>Change a setting from the browser on your phone while you're on home Wi-Fi.</p></div>
+        <div><h3>Quiet light</h3><p>A dim Night style and a red wind-down light keep it easy on the eyes after dark.</p></div>
+        <div><h3>Built by hand</h3><p>Each Bar and Panel is assembled, flashed and tested by ARXI before it ships.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="inside">
+    <div class="wrap">
+      <div class="sec-head" style="margin-bottom:20px">
+        <p class="eyebrow">Inside</p>
+        <h2>Soft light, by design.</h2>
+        <p>A frosted diffuser sits in front of a full-color LED panel, so every pixel blends into smooth, even light that reads from across the room. Scroll and it comes apart.</p>
+      </div>
+      <div class="stage3d xstage" id="xstage"><div class="fallback" id="xfb" hidden>Your browser can’t show the 3D view.</div></div>
+      <div class="hw-row"><button type="button" class="xbtn" id="xbtn">Take it apart</button><p class="hw-note">Frame, frosted diffuser, LED panel, controller and back shell. Each one assembled and tested by ARXI.</p></div>
+    </div>
+  </section>
+
+  <section class="rooms-band">
+    <div class="wrap rooms-band-in">
+      <div>
+        <p class="eyebrow">Every room</p>
+        <h2>Kitchen, entryway, office, garage.</h2>
+        <p>Each room gets its own job. Tap through a floor plan, watch what each display would show, and price out the whole house.</p>
+      </div>
+      <a class="btn" href="rooms.html">Plan your rooms →</a>
+    </div>
+  </section>
+
+  <section id="pricing">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="eyebrow">Pricing</p>
+        <h2>Starting prices</h2>
+        <p>Pick one, or let the store build a set for you.</p>
+      </div>
+
+      <div class="prices">
+        <div class="price"><div class="price-top"><b>Lite Bar</b><span class="size">Two lines</span></div><div class="amt">$159</div><p>Clock, weather, scores and messages.</p><a class="more" href="features.html#lite">Full features →</a></div>
+        <div class="price"><div class="price-top"><b>Pro Bar</b><span class="size">Two lines</span></div><div class="amt">$249</div><p>Adds presence, lyrics, room sensors and sound-reactive light.</p><a class="more" href="features.html#pro-bar">Full features →</a></div>
+        <div class="price"><div class="price-top"><b>Pro Panel</b><span class="size">Three lines</span></div><div class="amt">$299</div><p>Everything in Pro on the sharper display with bigger text.</p><a class="more" href="features.html#pro-panel">Full features →</a></div>
+      </div>
+      <p class="price-note">Two or more displays connect, with the hub included, and the store finds your best set price automatically. <a href="store.html">Build yours →</a></p>
+    </div>
+  </section>
+
+  <section class="rooms-band" id="quote">
+    <div class="wrap rooms-band-in">
+      <div>
+        <p class="eyebrow">Ready?</p>
+        <h2>Build yours in the store.</h2>
+        <p>Tell us the rooms. The store picks the displays and your best price.</p>
+      </div>
+      <a class="btn" href="store.html">Shop the store →</a>
+    </div>
+  </section>
+</main>
+
+<footer><div class="wrap"><span>ARXI Systems · ARXI makes</span><span>ARXI Bar &amp; Panel · Lite / Pro / Connected</span></div></footer>
+
+<script src="matrix.js"></script>
+<script src="models3d.js"></script>
+<script>
+(function(){
+  const C=ArxiMatrix.C;
+  const DATE='TUE OCT 28';
+  const SCENES={
+    lite:[
+      {label:'Clock & weather',lines:[{t:'10:42 PM',c:C.WH},{t:'68* CLEAR',c:['#FFB04A','#FF4FD8']},{t:DATE,c:C.CY}],icon:'moon'},
+      {label:'Today’s games',lines:[{t:'NYG 17 Q3'},{t:'PHI 21 4:12'},{t:'MORE AT 8',c:C.AMB}]},
+      {label:'Today’s games',lines:[{t:'CHA 98 F'},{t:'NYK 94'},{t:'FINAL',c:C.AMB}]},
+      {label:'Scrolling message',lines:[{t:'WELCOME',c:'rainbow'},{t:'GAME NIGHT AT 8 - BRING SNACKS',c:C.WH},{t:'TONIGHT 8PM',c:C.PNK}]}
+    ],
+    pro:[
+      {label:'Presence: someone walked in',lines:[{t:'WELCOME IN',c:C.AMB},{t:'68* CLEAR',c:C.CY},{t:'EVENING',c:C.VIO}],icon:'sun'},
+      {label:'Sonos now playing',lines:[{t:'LIVING RM',c:C.GRN},{t:'MIDNIGHT DRIVE - THE LOW HOURS',c:'flow'},{t:'VOL 32',c:C.CY}],icon:'note'},
+      {label:'Synced lyrics',lines:[{t:'> LYRICS',c:C.PNK},{t:'CITY LIGHTS ON THE WATER TONIGHT',c:'flow'},{t:'ICON: STAR',c:C.YEL}],icon:'star'},
+      {label:'Sound-reactive light',lines:[],fx:'viz',hold:5200},
+      {label:'Night style',lines:[{t:'10:58'}],dim:true}
+    ],
+    connected:[
+      {label:'Hub: 4 games today',lines:[{t:'4 GAMES',c:C.CY},{t:'NEXT 8:15',c:C.AMB},{t:'HUB ONLINE',c:C.GRN}]},
+      {label:'Hub → bar: live score',lines:[{t:'DAL 24 Q4'},{t:'WAS 20 1:48'},{t:'LIVE',c:C.RED}]},
+      {label:'Touchdown',lines:[],fx:'burst',hold:3200},
+      {label:'Hub → bar + companion',lines:[{t:'NOW PLAY',c:C.GRN},{t:'COMPANION: ICONS'},{t:'HUB SYNCED',c:C.CY}],icon:'heart'},
+      {label:'4 AM rollover',lines:[{t:'NEW DAY',c:C.AMB},{t:'FINALS CLEARED',c:C.CY},{t:'4 AM RESET',c:C.VIO}]}
+    ]
+  };
+  const cv=document.getElementById('matrix'),label=document.getElementById('scene-label');
+  const mx=ArxiMatrix(cv,{w:44,h:11,onLabel:t=>{label.textContent=t}});
+  let tier='lite';
+  function setTier(t){
+    tier=t;mx.setScenes(SCENES[t]);
+    document.querySelectorAll('.tabs button[data-tier]').forEach(b=>b.setAttribute('aria-selected',b.dataset.tier===t?'true':'false'));
+    const pb=document.getElementById('s-panel');pb.disabled=t==='lite';
+    if(t==='lite')setSize('bar');else if(t==='connected')setSize('panel');
+  }
+  function setSize(s){
+    mx.setSize(44,s==='panel'?22:11);
+    document.getElementById('size-meta').innerHTML=s==='panel'?'<b>Panel</b> · three lines of text':'<b>Bar</b> · two lines of text';
+    document.querySelectorAll('.tabs button[data-size]').forEach(b=>b.setAttribute('aria-selected',b.dataset.size===s?'true':'false'));
+  }
+  document.querySelectorAll('.tabs button[data-tier]').forEach(b=>b.addEventListener('click',()=>setTier(b.dataset.tier)));
+  document.querySelectorAll('.tabs button[data-size]').forEach(b=>b.addEventListener('click',()=>{if(!b.disabled)setSize(b.dataset.size)}));
+  setTier('lite');
+
+  /* full-colour demo */
+  const cc=document.getElementById('cmatrix');
+  if(cc){
+    const cm=ArxiMatrix(cc,{w:44,h:22,onLabel:t=>{document.getElementById('c-label').textContent=t}});
+    const pick=document.getElementById('c-pick');
+    const DEMO={
+      scores:[{label:'Scores in team colors',lines:[{t:'GB 14 Q3'},{t:'DET 17 5:46'},{t:'LIVE',c:C.RED}],hold:4200}],
+      lyrics:[{label:'Lyrics that move through the spectrum',lines:[{t:'> NOW',c:C.PNK},{t:'CITY LIGHTS ON THE WATER TONIGHT',c:'flow'},{t:'THE LOW HOURS',c:C.VIO}],icon:'note'}],
+      sound:[{label:'Sound-reactive light (Pro)',lines:[],fx:'viz',hold:6000}],
+      icons:[{label:'Icons in color',lines:[{t:'72* SUNNY',c:C.YEL},{t:'RAIN AT 6',c:'#3FA9FF'},{t:'GOODNIGHT',c:'#DDE7FF'}],icon:'sun'},
+             {label:'Icons in color',lines:[{t:'GAME DAY',c:C.ORG},{t:'KICKOFF 1PM',c:C.WH},{t:'GO TEAM',c:'rainbow'}],icon:'ball'},
+             {label:'Icons in color',lines:[{t:'HAPPY BDAY',c:C.PNK},{t:'MAYA - 3 DAYS',c:C.WH},{t:'PARTY AT 6',c:C.YEL}],icon:'heart'}],
+      mine:[]
+    };
+    function mine(){const c=pick.value;return[{label:'Any color you pick',lines:[{t:'10:42',c},{t:'ANY COLOR',c:[c,'#FFFFFF']},{t:'YOU PICK',c}],fx:'wash',fxColors:[c,'#050608'],hold:8000}]}
+    function show(k){document.querySelectorAll('#c-chips button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.c===k?'true':'false'));
+      document.getElementById('c-pickwrap').hidden=k!=='mine';cm.setScenes(k==='mine'?mine():DEMO[k])}
+    document.getElementById('c-chips').addEventListener('click',e=>{const b=e.target.closest('button');if(b)show(b.dataset.c)});
+    pick.addEventListener('input',()=>show('mine'));
+    show('scores');
+  }
+
+  /* 3D hardware */
+  const st=document.getElementById('stage3d');
+  if(st){
+    const go=()=>{const m=window.ArxiModels&&ArxiModels(st,{
+      panel:[{label:'Scores',lines:[{t:'GB 14 Q3'},{t:'DET 17 5:46'},{t:'LIVE',c:C.RED}],hold:5000},{label:'Clock',lines:[{t:'10:42 PM',c:C.WH},{t:'68* CLEAR',c:['#FFB04A','#FF4FD8']},{t:'TUE OCT 28',c:C.CY}],icon:'moon',hold:5000}],
+      bar:[{label:'Synced lyrics',lines:[{t:'> NOW',c:C.PNK},{t:'CITY LIGHTS ON THE WATER TONIGHT',c:'flow'}],icon:'note'},{label:'Sound',lines:[],fx:'viz',hold:5000}]});
+      if(!m){document.getElementById('fb3d').hidden=false;return}
+      const xs=document.getElementById('xstage'),x=window.ArxiExploded&&ArxiExploded(xs,{finish:'black',scenes:[{label:'Lyrics',lines:[{t:'> NOW',c:C.PNK},{t:'CITY LIGHTS ON THE WATER TONIGHT',c:'flow'}],icon:'note'},{label:'Scores',lines:[{t:'GB 14 Q3'},{t:'DET 17 5:46'}],hold:4000}]});
+      if(!x)document.getElementById('xfb').hidden=false;
+      else{const xb=document.getElementById('xbtn');xb.addEventListener('click',()=>{const apart=x.toggle();xb.setAttribute('aria-pressed',apart?'true':'false');xb.textContent=apart?'Put it back together':'Take it apart'})}
+      const notes={both:'Bar for two lines of text. Panel for three, with bigger type.',bar:'ARXI Bar. Slim enough for a shelf, a desk or above the TV.',panel:'ARXI Panel. Twice as tall, for three lines and bigger text.'};
+      document.querySelectorAll('.seg3 button[data-m]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.seg3 button[data-m]').forEach(x=>x.setAttribute('aria-pressed',x===b?'true':'false'));m.setMode(b.dataset.m);document.getElementById('hw-note').textContent=notes[b.dataset.m];
+        const mixB=document.querySelector('#fin3 [data-f="mix"]');mixB.hidden=b.dataset.m!=='both';if(b.dataset.m!=='both'&&mixB.getAttribute('aria-pressed')==='true')document.querySelector('#fin3 [data-f="black"]').click()}));
+      document.querySelectorAll('#fin3 button').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('#fin3 button').forEach(x=>x.setAttribute('aria-pressed',x===b?'true':'false'));m.setFinish(b.dataset.f)}))};
+    if(window.THREE)go();else{const sc=document.createElement('script');sc.src='https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';sc.onload=go;sc.onerror=()=>{document.getElementById('fb3d').hidden=false};document.head.appendChild(sc)}
+  }
+
+  document.querySelectorAll('[data-copy]').forEach(btn=>btn.addEventListener('click',()=>{
+    const el=document.getElementById(btn.dataset.copy),txt=el.textContent;
+    const done=()=>{btn.textContent='Copied';setTimeout(()=>btn.textContent='Copy',1500)};
+    const sel=()=>{const r=document.createRange();r.selectNodeContents(el);const s=getSelection();s.removeAllRanges();s.addRange(r);btn.textContent='Selected'};
+    try{navigator.clipboard.writeText(txt).then(done,sel)}catch(e){sel()}
+  }));
+})();
+</script>
+<script src="cart.js"></script>
+<script src="ui.js"></script>
+
+</body></html>

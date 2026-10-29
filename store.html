@@ -1,0 +1,428 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ARXI Store</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="arxi.css">
+<style>
+/* Layout: a two-step builder on the left (rooms or an idea, then adjust each display); a sticky order summary on the right that explains the price and holds checkout. */
+.hero{padding-block:40px 24px;border-bottom:0}
+.hero h1{font-size:clamp(36px,5.5vw,60px)}
+.hero h1 em{font-style:normal;color:var(--amber)}
+.hero .lede{margin-top:10px}
+
+.shop{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:28px;align-items:start;padding-block:0 80px}
+.builder{display:grid;gap:16px;min-width:0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:22px;display:grid;gap:14px;min-width:0}
+.step{display:flex;align-items:baseline;gap:10px}
+.step .n{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.step h2{font-size:22px;letter-spacing:-.02em}
+.hint{font-size:14px;color:var(--muted)}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{font:500 14px var(--body);color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:8px 14px;cursor:pointer;transition:border-color .15s,background .15s}
+.chip:hover{border-color:#B9C0CA}
+.chip[aria-pressed="true"]{background:var(--fg);color:#fff;border-color:var(--fg)}
+.chip:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+.ideas .chip{background:var(--raised);border-color:transparent}
+.ideas .chip small{color:var(--muted);margin-left:6px;font-family:var(--mono);font-size:12px}
+.ideas .chip:hover{border-color:var(--line)}
+.label{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+
+.lines{list-style:none;margin:0;padding:0;display:grid}
+.ln{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto auto;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.ln select{font:500 15px var(--body);color:var(--fg);background:transparent;border:0;padding:2px 18px 2px 0;max-width:100%;cursor:pointer;appearance:none;-webkit-appearance:none;
+  background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:right 6px top 55%,right 1px top 55%;background-size:5px 5px;background-repeat:no-repeat}
+.ln select:focus-visible{outline:2px solid var(--amber);outline-offset:2px;border-radius:4px}
+.fin{display:inline-flex;gap:6px;margin-top:4px}
+.fin button{width:18px;height:18px;border-radius:50%;border:1px solid #B9C0CA;cursor:pointer;padding:0}
+.fin button[data-f="black"]{background:#111316}.fin button[data-f="white"]{background:#F4F5F7}
+.fin button[aria-pressed="true"]{outline:2px solid var(--amber);outline-offset:2px}
+.lineup{position:relative;aspect-ratio:16/8;border-radius:10px;overflow:hidden;background:radial-gradient(120% 90% at 50% 30%,#FFFFFF 0%,#EEF1F5 55%,#E2E6EC 100%);border:1px solid var(--line);margin:-4px 0 0}
+.lineup .more{position:absolute;right:8px;top:8px;font:500 12px var(--mono);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:2px 8px;z-index:1}
+.lineup .more[hidden]{display:none}
+.thumb{width:72px;height:45px;border-radius:6px;background:var(--raised);object-fit:cover;flex:none}
+.room{display:flex;gap:12px;align-items:center}
+.room .rtext{min-width:0;display:grid}
+.qty{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.qty button{width:32px;height:32px;border:0;background:none;color:var(--fg);font-size:17px;cursor:pointer;line-height:1}
+.qty button:hover{background:var(--raised)}
+.qty button:disabled{color:var(--line);cursor:default;background:none}
+.qty output{min-width:26px;text-align:center;font:500 14px var(--mono);font-variant-numeric:tabular-nums}
+.modes{display:inline-flex;background:var(--raised);border-radius:999px;padding:3px;gap:2px;justify-self:start}
+.modes button{font:500 13px var(--body);color:var(--muted);background:none;border:0;border-radius:999px;padding:7px 14px;cursor:pointer}
+.modes button[aria-selected="true"]{background:var(--surface);color:var(--fg);box-shadow:0 1px 2px rgba(13,17,23,.12)}
+.qrows{display:grid}
+.qrow{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:14px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.qrow:last-child{border-bottom:0}
+.qrow b{font-weight:600;display:block}
+.qrow small{font-size:13px;color:var(--muted)}
+.qrow .pr{font:14px var(--mono);color:var(--muted)}
+.reassure{font-size:14px;color:var(--muted);background:var(--raised);border-radius:10px;padding:12px 14px;margin:0}
+.reassure b{color:var(--fg);font-weight:500}
+.ln:first-child{padding-top:0}
+.ln b{font-weight:500}
+.ln .room small{display:block;font-size:12px;color:var(--muted)}
+.ln .pick{display:inline-flex;background:var(--raised);border-radius:999px;padding:3px;gap:2px}
+.ln .pick button{font:500 13px var(--body);color:var(--muted);background:none;border:0;border-radius:999px;padding:6px 12px;cursor:pointer}
+.ln .pick button[aria-pressed="true"]{background:var(--surface);color:var(--fg);box-shadow:0 1px 2px rgba(13,17,23,.12)}
+.ln .pick button:focus-visible{outline:2px solid var(--amber);outline-offset:1px}
+.ln .lp{font-family:var(--mono);font-size:14px;font-variant-numeric:tabular-nums;min-width:52px;text-align:right}
+.x{width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:none;color:var(--muted);cursor:pointer;font-size:16px;line-height:1}
+.x:hover{color:var(--fg);border-color:#B9C0CA}
+.empty{color:var(--muted);font-size:15px;padding:6px 0}
+.addmore{justify-self:start;font:500 14px var(--body);color:var(--amber);background:none;border:0;padding:0;cursor:pointer}
+.addmore:hover{text-decoration:underline}
+.checks{display:grid;gap:10px}
+.ck{display:flex;gap:10px;align-items:flex-start;font-size:15px;cursor:pointer}
+.ck input{width:18px;height:18px;margin:2px 0 0;accent-color:var(--fg);flex:none}
+.ck small{display:block;color:var(--muted);font-size:13px}
+details.helpacc{border:0;background:none}
+details.helpacc>summary{padding:0}
+details.helpacc>summary:hover{background:none}
+details.helpacc .acc-body{padding:12px 0 0}
+.cmp3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.cmp3 div{background:var(--raised);border-radius:10px;padding:14px;display:grid;gap:4px;align-content:start}
+.cmp3 b{font-weight:600}
+.cmp3 span{font-size:13px;color:var(--muted)}
+.cmp3 .pr{font-family:var(--mono);font-size:13px;color:var(--fg)}
+
+.sum{position:sticky;top:calc(env(safe-area-inset-top,0px) + 76px);background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:22px;display:grid;gap:16px;min-width:0;box-shadow:0 20px 40px -32px rgba(13,17,23,.4)}
+.sum h2{font-size:22px;display:flex;justify-content:space-between;align-items:baseline}
+.sum h2 span{font-family:var(--mono);font-size:12px;font-weight:400;color:var(--muted)}
+.smart{border-radius:10px;padding:12px 14px;background:var(--raised);font-size:14px;display:grid;gap:8px}
+.smart.on{background:#EEF2FF;color:#1E3A9E}
+.smart b{font-weight:600}
+.smart .nudge{display:flex;justify-content:space-between;align-items:center;gap:10px;padding-top:8px;border-top:1px solid rgba(31,79,224,.15)}
+.smart .nudge button{font:500 13px var(--body);background:var(--amber);color:#fff;border:0;border-radius:999px;padding:7px 12px;cursor:pointer;white-space:nowrap}
+.olist{list-style:none;margin:0;padding:0;display:grid;gap:6px;font-size:14px}
+.olist li{display:flex;justify-content:space-between;gap:10px}
+.olist li span:last-child{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.olist .inc{color:var(--green)}
+.totals{margin:0;display:grid;gap:6px;border-top:1px solid var(--line);padding-top:14px}
+.totals div{display:flex;justify-content:space-between;gap:10px;font-size:14px}
+.totals dt{color:var(--muted)}
+.totals dd{margin:0;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.totals .sv dd{color:var(--green)}
+.totals .tt{padding-top:8px;align-items:baseline}
+.totals .tt dt{color:var(--fg);font-weight:600}
+.totals .tt dd{font-family:var(--display);font-weight:600;font-size:34px;letter-spacing:-.02em}
+.code>summary{list-style:none;cursor:pointer;font-size:14px;color:var(--amber)}
+.code>summary::-webkit-details-marker{display:none}
+.code .row{display:flex;gap:8px;margin-top:10px}
+.code input{flex:1;min-width:0;font:15px var(--mono);text-transform:uppercase;border:1px solid var(--line);border-radius:8px;padding:9px 12px;background:var(--surface);color:var(--fg)}
+.code input:focus{outline:2px solid var(--amber);outline-offset:1px}
+.code button{font:500 14px var(--body);border:1px solid var(--fg);background:var(--surface);color:var(--fg);border-radius:8px;padding:9px 14px;cursor:pointer}
+.code .msg{font-size:13px;margin-top:8px}
+.code .msg.ok{color:var(--green)}
+.code .msg.err{color:var(--red)}
+.sum .btn{width:100%;text-align:center;border-radius:10px;padding:14px 20px;font:600 15px var(--body);letter-spacing:0;text-transform:none;background:var(--fg);border-color:var(--fg);color:#fff}
+.sum .btn:disabled{opacity:.35;cursor:not-allowed}
+.fine{font-size:12px;color:var(--muted)}
+.form{display:grid;gap:10px}
+.form label{display:grid;gap:4px;font-size:13px;color:var(--muted)}
+.form input,.form textarea{font:15px var(--body);color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px;width:100%}
+.form input:focus,.form textarea:focus{outline:2px solid var(--amber);outline-offset:1px}
+.form .err{color:var(--red);font-size:13px}
+.linkbtn{background:none;border:0;color:var(--muted);font:13px var(--body);text-decoration:underline;cursor:pointer;padding:0;justify-self:start}
+.done pre{white-space:pre-wrap;font-family:var(--mono);font-size:12px;background:var(--raised);border-radius:8px;padding:12px;margin:0;max-height:240px;overflow:auto}
+.done{display:grid;gap:12px}
+
+.bar{display:none}
+@media (max-width:980px){
+  .shop{grid-template-columns:1fr}
+  .sum{position:static}
+  .bar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:6;justify-content:space-between;align-items:center;gap:12px;background:var(--surface);border-top:1px solid var(--line);
+    padding:12px max(16px,env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));box-shadow:0 -8px 24px -18px rgba(13,17,23,.4)}
+  .bar b{font-size:22px;font-weight:600}
+  .bar span{font-size:13px;color:var(--muted)}
+  .bar a{background:var(--fg);color:#fff;border-radius:999px;padding:10px 16px;text-decoration:none;font-weight:500;font-size:14px}
+  body{padding-bottom:84px}
+}
+@media (max-width:620px){
+  .ln{grid-template-columns:minmax(0,1fr) auto auto;row-gap:8px}
+  .ln .pick{grid-column:1/-1;justify-self:start;grid-row:2}
+  .ln .lp{grid-column:2;grid-row:2;text-align:right}
+  .ln .x{grid-row:2;grid-column:3}
+  .qrow{grid-template-columns:minmax(0,1fr) auto}
+  .qrow .pr{grid-column:1;grid-row:2}
+  .cmp3{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<header class="site">
+  <div class="wrap">
+    <a class="mark" href="index.html">ARXI<span>·</span>SYSTEMS</a>
+    <nav aria-label="Site">
+      <a href="index.html">Overview</a><a href="features.html#lite">Features</a><a href="rooms.html">Every room</a><a href="who.html">Who it's for</a><a href="connected.html">Connected</a><a href="store.html" data-cart aria-current="page">Store</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap">
+      <p class="eyebrow">Store</p>
+      <h1>Build your <em>ARXI.</em></h1>
+      <p class="lede">Pick by room or just pick how many. We find your best price, and you set up what each display shows after it arrives.</p>
+    </div>
+  </section>
+
+  <div class="wrap shop">
+    <div class="builder">
+      <div class="card">
+        <div class="step"><span class="n">1</span><h2>What do you want?</h2></div>
+        <div class="modes" role="tablist" aria-label="How to choose">
+          <button type="button" role="tab" id="m-room" aria-selected="true" aria-controls="p-room">By room</button>
+          <button type="button" role="tab" id="m-qty" aria-selected="false" aria-controls="p-qty">By quantity</button>
+        </div>
+        <div id="p-room" role="tabpanel" aria-labelledby="m-room" style="display:grid;gap:14px">
+          <div class="chips" id="rooms" role="group" aria-label="Rooms"></div>
+          <span class="label">Or start from an idea</span>
+          <div class="chips ideas" id="ideas" role="group" aria-label="Ideas"></div>
+        </div>
+        <div id="p-qty" role="tabpanel" aria-labelledby="m-qty" hidden>
+          <p class="hint" style="margin:0 0 4px">Not sure about rooms yet? Just pick how many. Choose black or white for each one below.</p>
+          <div class="qrows" id="qrows"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="step"><span class="n">2</span><h2>Your displays</h2></div>
+        <p class="reassure" id="lines-hint"><b>Nothing here is final.</b> Rooms are optional, and you don’t pick features now. What each display shows is set from your phone after it arrives, and you can change it anytime. The choices that matter today are Lite or Pro, because Pro has the sensors built in, and black or white.</p>
+        <ul class="lines" id="lines" aria-live="polite"></ul>
+        <button type="button" class="addmore" id="addmore">+ Add another display</button>
+        <div class="checks">
+          <label class="ck"><input type="checkbox" id="owns"><span>I already have an ARXI display<small>Owner pricing, with the hub included</small></span></label>
+          <label class="ck" id="hubrow"><input type="checkbox" id="hub"><span>Add the hub now, $49<small>Finds your next display on its own. Included free with two or more.</small></span></label>
+        </div>
+        <details class="acc helpacc"><summary><span class="t" style="font-size:16px">Which display is right?</span></summary><div class="acc-body">
+          <div class="cmp3">
+            <div><b>Lite Bar</b><span class="pr">$159</span><span>Clock, weather, scores, timers and messages.</span></div>
+            <div><b>Pro Bar</b><span class="pr">$249</span><span>Adds presence radar, room light, lyrics from your Sonos or HEOS speaker, and sound-reactive light.</span></div>
+            <div><b>Pro Panel</b><span class="pr">$299</span><span>Everything in Pro on a taller display with bigger text. Pre-order.</span></div>
+          </div>
+          <p class="fine" style="margin-top:10px"><a href="features.html#lite">Compare every feature →</a></p>
+        </div></details>
+      </div>
+    </div>
+
+    <aside class="sum" id="sum" aria-labelledby="sum-h">
+      <h2 id="sum-h">Your order <span id="sum-n">0 displays</span></h2>
+      <div class="lineup" id="lineup" hidden><span class="more" id="lineup-more" hidden></span></div>
+      <div id="view-cart" style="display:grid;gap:16px">
+        <div class="smart" id="smart"></div>
+        <ul class="olist" id="olist"></ul>
+        <dl class="totals" id="totals"></dl>
+        <details class="code" id="code"><summary>Have a discount code?</summary>
+          <div class="row"><input id="code-in" placeholder="Code" aria-label="Discount code" autocomplete="off"><button type="button" id="code-go">Apply</button></div>
+          <p class="msg" id="code-msg" hidden></p>
+        </details>
+        <button type="button" class="btn" id="go">Continue</button>
+        <p class="fine">No payment now. We confirm your order, then send a secure payment link.</p>
+      </div>
+      <form class="form" id="form" hidden novalidate>
+        <label>Name<input id="f-name" autocomplete="name"></label>
+        <label>Email<input id="f-email" type="email" autocomplete="email"></label>
+        <label>ZIP code<input id="f-zip" autocomplete="postal-code" inputmode="numeric"></label>
+        <label>Anything we should know? (optional)<textarea id="f-notes" rows="2" placeholder="Your team, your speaker, where it mounts"></textarea></label>
+        <p class="err" id="f-err" hidden></p>
+        <button type="submit" class="btn" id="f-go">Send order request</button>
+        <button type="button" class="linkbtn" id="back">Back</button>
+      </form>
+      <div class="done" id="paying" hidden>
+        <p id="pay-msg"><b>Opening secure checkout…</b></p>
+        <a class="btn" id="pay-link" href="#" target="_blank" rel="noopener" hidden>Continue to secure checkout</a>
+        <p class="fine">Payment is handled by Square. ARXI never sees your card.</p>
+        <button type="button" class="linkbtn" id="back3">Back to order</button>
+      </div>
+      <div class="done" id="done" hidden>
+        <p><b>Order request ready.</b> Copy it and send it to us at arxisystems.com or @arxisystems on Instagram. We'll confirm and send a secure payment link.</p>
+        <pre id="summary"></pre>
+        <button type="button" class="btn" id="copy">Copy order request</button>
+        <button type="button" class="linkbtn" id="back2">Back to order</button>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<div class="bar"><span id="bar-n">No displays yet</span><b id="bar-t">$0</b><a href="#sum">Review</a></div>
+
+<footer class="site"><div class="wrap"><span>ARXI Systems · ARXI makes</span><span>ARXI Store</span></div></footer>
+
+<script src="matrix.js"></script>
+<script src="models3d.js"></script>
+<script src="config.js"></script>
+<script src="cart.js"></script>
+<script>
+(function(){
+  const A=window.ARXI,$=id=>document.getElementById(id),fmt=A.fmt;
+  const ROOMS=[['Living room','panel'],['Kitchen','lite'],['Bedroom','lite'],['Office','probar'],['Game room','panel'],['Entryway','probar'],['Kids’ room','lite'],['Garage','probar']];
+  const IDEAS=[
+    ['One display',[['','probar']]],
+    ['Music in two rooms',[['Living room','probar'],['Kitchen','probar']]],
+    ['Family kitchen & kids',[['Kitchen','lite'],['Kids’ room','lite']]],
+    ['Game room',[['Game room','panel'],['Game room','probar'],['Game room','probar']]],
+    ['Whole home',[['Living room','panel'],['Game room','panel'],['Kitchen','probar'],['Office','probar']]]
+  ];
+  let cart=A.load();
+  const recFor=room=>(ROOMS.find(r=>r[0]===room)||[0,'probar'])[1];
+
+  const roomsEl=$('rooms');
+  ROOMS.forEach(([r])=>{const b=document.createElement('button');b.type='button';b.className='chip';b.textContent=r;b.dataset.r=r;
+    b.addEventListener('click',()=>{if(cart.lines.some(l=>l.room===r))cart.lines=cart.lines.filter(l=>l.room!==r);else cart.lines.push({room:r,product:recFor(r)});commit()});roomsEl.appendChild(b)});
+  const ideasEl=$('ideas');
+  IDEAS.forEach(([n,ls])=>{const c={lines:ls.map(([room,product])=>({room,product})),hub:0,owns:false,code:''},p=A.base(c);
+    const b=document.createElement('button');b.type='button';b.className='chip';b.innerHTML=n+'<small>'+fmt(p.total)+'</small>';
+    b.addEventListener('click',()=>{cart.lines=c.lines.map(l=>Object.assign({},l));commit()});ideasEl.appendChild(b)});
+  $('addmore').addEventListener('click',()=>{cart.lines.push({room:'',product:'probar'});commit()});
+  /* by room / by quantity */
+  function mode(m){$('m-room').setAttribute('aria-selected',m==='room'?'true':'false');$('m-qty').setAttribute('aria-selected',m==='qty'?'true':'false');$('p-room').hidden=m!=='room';$('p-qty').hidden=m!=='qty'}
+  $('m-room').addEventListener('click',()=>mode('room'));$('m-qty').addEventListener('click',()=>mode('qty'));
+  const BLURB={lite:'Clock, weather, scores, timers and messages',probar:'Adds presence, room light, lyrics and sound-reactive light',panel:'Everything in Pro, taller with bigger text. Pre-order.'};
+  function stepper(n,onMinus,onPlus,label){const q=document.createElement('span');q.className='qty';q.setAttribute('role','group');q.setAttribute('aria-label',label);
+    q.innerHTML='<button type="button" aria-label="One fewer">−</button><output aria-live="polite">'+n+'</output><button type="button" aria-label="One more">+</button>';
+    const [m,p]=q.querySelectorAll('button');m.disabled=n<=0;m.addEventListener('click',onMinus);p.addEventListener('click',onPlus);return q}
+  function removeOne(product){/* drop an unassigned one first */let i=-1;for(let j=cart.lines.length-1;j>=0;j--){if(cart.lines[j].product===product&&!cart.lines[j].room){i=j;break}}
+    if(i<0)for(let j=cart.lines.length-1;j>=0;j--){if(cart.lines[j].product===product){i=j;break}}if(i>=0)cart.lines.splice(i,1)}
+  function renderQty(){const box=$('qrows');box.innerHTML='';const cnt=A.counts(cart);
+    ['lite','probar','panel'].forEach(k=>{const p=A.PROD[k],row=document.createElement('div');row.className='qrow';
+      row.innerHTML='<div><b></b><small></small></div><span class="pr">'+fmt(p.price)+' each</span>';row.querySelector('b').textContent=p.name;row.querySelector('small').textContent=BLURB[k];
+      row.appendChild(stepper(cnt[k],()=>{removeOne(k);commit()},()=>{cart.lines.push({room:'',product:k});commit()},p.name+' quantity'));box.appendChild(row)})}
+  $('owns').addEventListener('change',e=>{cart.owns=e.target.checked;commit()});
+  $('hub').addEventListener('change',e=>{cart.hub=e.target.checked?1:0;commit()});
+  function applyCode(){cart.code=$('code-in').value.trim().toUpperCase();commit()}
+  $('code-go').addEventListener('click',applyCode);
+  $('code-in').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();applyCode()}});
+
+  function commit(){A.save(cart);render()}
+  /* A ready-made Square checkout link fits carts of one or two displays (or the hub alone), without a code or owner pricing. */
+  function squareLink(){const L=window.ARXI_SQUARE_LINKS||{};if(cart.owns||(cart.code||'').trim())return null;const n=cart.lines.length;
+    if(!n)return cart.hub?L.hub||null:null;if(n>2||(n===1&&cart.hub))return null;
+    const k=cart.lines.map(l=>l.product+'|'+(l.finish||'black')).sort().join('+');return L[k]||null}
+  let lineup=null,lineupTried=false;
+  function renderLineup(){
+    const box=$('lineup');if(!cart.lines.length){box.hidden=true;return}
+    if(!lineup&&!lineupTried&&window.THREE&&window.ArxiLineup){lineupTried=true;box.hidden=false;
+      lineup=ArxiLineup(box,{bar:[{label:'Clock',lines:[{t:'10:42',c:'#F4F1FF'},{t:'68* CLEAR',c:['#FFB04A','#FF4FD8']}],icon:'moon',hold:99999}],
+        panel:[{label:'Scores',lines:[{t:'GB 14 Q3'},{t:'DET 17 5:46'},{t:'LIVE',c:'#FF3B5C'}],hold:99999}]});
+      if(!lineup){box.hidden=true;return}}
+    if(!lineup){box.hidden=true;return}
+    box.hidden=false;const items=cart.lines.map(l=>({kind:l.product==='panel'?'panel':'bar',finish:l.finish||'black'}));
+    items.sort((a,b)=>(a.kind===b.kind?0:a.kind==='panel'?-1:1));lineup.setItems(items);
+    const m=$('lineup-more');m.hidden=items.length<=8;m.textContent='+'+(items.length-8)+' more';
+  }
+  (function(){if(window.THREE){return}const sc=document.createElement('script');sc.src='https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';sc.onload=()=>render();document.head.appendChild(sc)})();
+  function render(){
+    const pr=A.price(cart),n=cart.lines.length;
+    roomsEl.querySelectorAll('.chip').forEach(b=>b.setAttribute('aria-pressed',cart.lines.some(l=>l.room===b.dataset.r)?'true':'false'));
+    $('owns').checked=cart.owns;$('hub').checked=!!cart.hub;
+    $('hubrow').hidden=n>=2||(cart.owns&&n>0);
+    const ul=$('lines');ul.innerHTML='';
+    if(!n)ul.innerHTML='<li class="empty">Pick a room or a quantity above to start.</li>';
+    cart.lines.forEach(l=>{if(!l.finish)l.finish='black'});const same=(l,g)=>l.room===g.room&&l.product===g.product&&l.finish===g.finish;
+    const groups=[];cart.lines.forEach(l=>{let g=groups.find(x=>same(l,x));if(!g){g={room:l.room,product:l.product,finish:l.finish,n:0};groups.push(g)}g.n++});
+    groups.forEach(g=>{const li=document.createElement('li');li.className='ln';const p=A.PROD[g.product];
+      li.innerHTML='<span class="room"><img class="thumb" alt="" hidden><span class="rtext"><select aria-label="Room"></select><small>'+p.size+(g.product==='panel'?' · pre-order':'')+'</small><span class="fin" role="group" aria-label="Finish"><button type="button" data-f="black" aria-label="Black" title="Black"></button><button type="button" data-f="white" aria-label="White" title="White"></button></span></span></span><span class="qslot"></span><span class="pick" role="group"></span><span class="lp">'+fmt((cart.owns?p.add:p.price)*g.n)+'</span><button type="button" class="x">×</button>';
+      const sel=li.querySelector('select');const opts=[['','No room yet']].concat(ROOMS.map(r=>[r[0],r[0]]));
+      if(g.room&&!ROOMS.some(r=>r[0]===g.room))opts.push([g.room,g.room]);
+      opts.forEach(([v,t])=>{const o=document.createElement('option');o.value=v;o.textContent=t;sel.appendChild(o)});sel.value=g.room;
+      sel.addEventListener('change',()=>{if(!g.room&&g.n>1){const l=cart.lines.find(l=>same(l,g));if(l)l.room=sel.value}else cart.lines.forEach(l=>{if(same(l,g))l.room=sel.value});commit()});
+      li.querySelectorAll('.fin button').forEach(b=>{b.setAttribute('aria-pressed',b.dataset.f===g.finish?'true':'false');b.addEventListener('click',()=>{if(g.n>1){const l=cart.lines.find(l=>same(l,g));if(l)l.finish=b.dataset.f}else cart.lines.forEach(l=>{if(same(l,g))l.finish=b.dataset.f});commit()})});
+      const label=(g.room||'Unassigned')+' '+A.FINISHES[g.finish].toLowerCase()+' '+p.name;li.querySelector('.x').setAttribute('aria-label','Remove '+label);
+      li.querySelector('.qslot').appendChild(stepper(g.n,()=>{const i=cart.lines.map((l,j)=>same(l,g)?j:-1).filter(j=>j>=0).pop();cart.lines.splice(i,1);commit()},
+        ()=>{cart.lines.push({room:g.room,product:g.product,finish:g.finish});commit()},'Quantity of '+label));
+      const pick=li.querySelector('.pick');pick.setAttribute('aria-label','Model for '+label);
+      ['lite','probar','panel'].forEach(k=>{const b=document.createElement('button');b.type='button';b.textContent=A.PROD[k].short;b.setAttribute('aria-pressed',g.product===k?'true':'false');
+        b.addEventListener('click',()=>{cart.lines.forEach(l=>{if(same(l,g))l.product=k});commit()});pick.appendChild(b)});
+      li.querySelector('.x').addEventListener('click',()=>{cart.lines=cart.lines.filter(l=>!same(l,g));commit()});
+      const th=li.querySelector('.thumb');if(window.ArxiStill)ArxiStill(g.product==='panel'?'panel':'bar',g.finish).then(u=>{if(u){th.src=u;th.hidden=false;th.alt=A.FINISHES[g.finish]+' '+p.name}});
+      ul.appendChild(li)});
+    renderQty();renderLineup();
+
+    const sm=$('smart'),nd=A.nudge(cart),setName=(pr.deal||'').split(' + ')[0];let h='';
+    sm.classList.toggle('on',pr.connected);
+    if(!n&&!cart.hub)h='Pick a room or a quantity to start.';
+    else if(!n&&cart.hub)h='<b>Just the hub.</b> It’s ready to connect your next display.';
+    else if(cart.owns)h='<b>Owner pricing.</b> Your new display'+(n>1?'s connect':' connects')+' to the one you have, hub included.';
+    else if(n===1)h='<b>One display.</b> Add a second any time and they connect, with the hub included.';
+    else h='<b>'+n+' displays, connected.</b> Hub included'+(setName&&setName!=='Hub included'?', with '+setName+' pricing.':'.');
+    if(nd){const nn=(nd.deal||'').split(' + ')[0];h+='<div class="nudge"><span>Add a '+A.PROD[nd.product].name+' for '+fmt(nd.delta)+' more'+(nn&&nn!=='Hub included'?' and it becomes a '+nn:'')+'.</span><button type="button" id="nudge-go">Add it</button></div>'}
+    sm.innerHTML=h;
+    if(nd)$('nudge-go').addEventListener('click',()=>{cart.lines.push({room:'',product:nd.product});commit()});
+
+    const ol=$('olist');ol.innerHTML='';const cnt=A.counts(cart);
+    ['lite','probar','panel'].forEach(k=>{if(!cnt[k])return;const p=A.PROD[k],li=document.createElement('li');
+      li.innerHTML='<span>'+(cnt[k]>1?cnt[k]+' × ':'')+p.name+'</span><span>'+fmt((cart.owns?p.add:p.price)*cnt[k])+'</span>';ol.appendChild(li)});
+    if(pr.hub==='included'){const li=document.createElement('li');li.innerHTML='<span>ARXI Hub</span><span class="inc">Included</span>';ol.appendChild(li)}
+    else if(cart.hub){const li=document.createElement('li');li.innerHTML='<span>ARXI Hub</span><span>'+fmt(A.HUB)+'</span>';ol.appendChild(li)}
+
+    const listTotal=['lite','probar','panel'].reduce((s,k)=>s+cnt[k]*(cart.owns?A.PROD[k].add:A.PROD[k].price),0)+(cart.hub&&pr.hub==='paid'?A.HUB:0);
+    const setSave=listTotal-pr.total;let t='';
+    if(setSave>0)t+='<div class="sv"><dt>'+(setName&&setName!=='Hub included'?setName+' savings':'Multi-display savings')+'</dt><dd>−'+fmt(setSave)+'</dd></div>';
+    if(pr.discount&&pr.discount.amount)t+='<div class="sv"><dt>Code '+pr.discount.code+'</dt><dd>−'+fmt(pr.discount.amount)+'</dd></div>';
+    t+='<div class="tt"><dt>Total</dt><dd>'+fmt(pr.grand)+'</dd></div>';
+    $('totals').innerHTML=t;
+    const msg=$('code-msg');
+    if(cart.code){msg.hidden=false;if(pr.discount.error){msg.className='msg err';msg.textContent=pr.discount.error}else{msg.className='msg ok';msg.textContent=pr.discount.label+' applied.'}$('code').open=true;$('code-in').value=cart.code}
+    else msg.hidden=true;
+
+    $('sum-n').textContent=n+(n===1?' display':' displays');
+    $('go').disabled=!n&&!cart.hub;
+    const sl=squareLink();$('go').textContent=sl?'Check out with Square':'Continue';
+    document.querySelector('#view-cart .fine').textContent=sl?'You pay securely on Square, then come back here.':(window.ARXI_CHECKOUT_URL?'You pay securely through Square on the next step.':'No payment now. We confirm your order, then send a secure payment link.');
+    $('bar-n').textContent=n?n+(n===1?' display':' displays'):(cart.hub?'Hub':'No displays yet');$('bar-t').textContent=fmt(pr.grand);
+  }
+
+  $('go').addEventListener('click',()=>{const u=squareLink();
+    if(u){$('view-cart').hidden=true;$('paying').hidden=false;const a=$('pay-link');a.href=u;a.hidden=false;$('pay-msg').innerHTML='<b>Opening secure checkout…</b> Total '+fmt(A.price(cart).grand)+'.';
+      try{window.top.location.href=u}catch(e){try{location.href=u}catch(e2){}}return}
+    $('view-cart').hidden=true;$('form').hidden=false;$('f-name').focus()});
+  $('back').addEventListener('click',()=>{$('form').hidden=true;$('view-cart').hidden=false});
+  $('back2').addEventListener('click',()=>{$('done').hidden=true;$('view-cart').hidden=false});
+  const AUTO=!!window.ARXI_CHECKOUT_URL;
+  if(AUTO){$('f-go').textContent='Continue to payment'}
+  $('back3').addEventListener('click',()=>{$('paying').hidden=true;$('view-cart').hidden=false});
+  async function autoCheckout(name,email,ref){
+    $('form').hidden=true;$('paying').hidden=false;$('pay-link').hidden=true;$('pay-msg').innerHTML='<b>Opening secure checkout…</b>';
+    const G={};cart.lines.forEach(l=>{const k=l.product+'|'+(l.finish||'black');G[k]=(G[k]||0)+1});
+    const body={lines:Object.entries(G).map(([k,q])=>{const [p,f]=k.split('|');return{p,f,q}}),hub:cart.hub,owns:!!cart.owns,code:cart.code||'',name,email,notes:[$('f-zip').value.trim()&&('ZIP '+$('f-zip').value.trim()),$('f-notes').value.trim()].filter(Boolean).join(' · '),ref};
+    try{const r=await fetch(window.ARXI_CHECKOUT_URL.replace(/\/$/,'')+'/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+      const j=await r.json().catch(()=>({}));if(!r.ok||!j.url)throw new Error(j.error||'Checkout is unavailable right now.');
+      const a=$('pay-link');a.href=j.url;a.hidden=false;$('pay-msg').innerHTML='<b>Your checkout is ready.</b> Total '+fmt(j.total)+'.';
+      try{window.top.location.href=j.url}catch(e){try{location.href=j.url}catch(e2){}}
+      return true}
+    catch(e){$('paying').hidden=true;return e.message||'Checkout is unavailable right now.'}
+  }
+  $('form').addEventListener('submit',async e=>{e.preventDefault();
+    const name=$('f-name').value.trim(),email=$('f-email').value.trim(),err=$('f-err');
+    if(!name){err.textContent='Add your name so we know who to reply to.';err.hidden=false;$('f-name').focus();return}
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){err.textContent='Check your email address. We send your confirmation there.';err.hidden=false;$('f-email').focus();return}
+    err.hidden=true;const pr=A.price(cart),d=new Date(),ref='ARXI-'+String(d.getFullYear()).slice(2)+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')+'-'+Math.random().toString(36).slice(2,6).toUpperCase();
+    if(AUTO){const ok=await autoCheckout(name,email,ref);if(ok===true)return;err.textContent=ok+' You can send an order request instead.';err.hidden=false;$('form').hidden=false;$('f-go').textContent='Send order request';}
+    const L=['ARXI order request '+ref,'Name: '+name,'Email: '+email];
+    if($('f-zip').value.trim())L.push('ZIP: '+$('f-zip').value.trim());
+    if(cart.owns)L.push('Already has an ARXI display');
+    L.push('');const G={};cart.lines.forEach(l=>{const k=A.PROD[l.product].name+', '+A.FINISHES[l.finish||'black'].toLowerCase()+(l.room?' ('+l.room+')':' (room not set)');G[k]=(G[k]||0)+1});Object.entries(G).forEach(([k,v])=>L.push('- '+(v>1?v+' × ':'')+k));L.push('Features and rooms: set up after delivery, changeable anytime');
+    if(pr.hub==='included')L.push('- ARXI Hub (included)');else if(cart.hub)L.push('- ARXI Hub');
+    if($('f-notes').value.trim())L.push('','Notes: '+$('f-notes').value.trim());
+    L.push('');if(pr.save>0)L.push('Pricing: '+pr.deal);if(pr.discount&&pr.discount.amount)L.push('Code: '+pr.discount.code+' (−'+fmt(pr.discount.amount)+')');
+    L.push('Total: '+fmt(pr.grand));
+    const G2={};cart.lines.forEach(l=>{const k=l.product+'|'+(l.finish||'black');G2[k]=(G2[k]||0)+1});
+    const data={v:1,ref,name,email,zip:$('f-zip').value.trim(),notes:$('f-notes').value.trim(),owns:!!cart.owns,
+      lines:Object.entries(G2).map(([k,q])=>{const [p,f]=k.split('|');return{p,f,q}}),
+      hub:pr.hub==='included'?'included':(cart.hub?'paid':'none'),deal:pr.save>0?pr.deal:'',code:pr.discount&&pr.discount.amount?pr.discount.code:'',total:pr.grand};
+    try{L.push('','Order data (for ARXI): '+btoa(unescape(encodeURIComponent(JSON.stringify(data)))))}catch(err){}
+    $('summary').textContent=L.join('\n');$('form').hidden=true;$('done').hidden=false});
+  $('copy').addEventListener('click',()=>{const b=$('copy'),t=$('summary').textContent;
+    const ok=()=>{b.textContent='Copied';setTimeout(()=>b.textContent='Copy order request',1600)};
+    const sel=()=>{const r=document.createRange();r.selectNodeContents($('summary'));const s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent='Selected, copy it'};
+    try{navigator.clipboard.writeText(t).then(ok,sel)}catch(e){sel()}});
+  render();
+})();
+</script>
+</body>
+</html>

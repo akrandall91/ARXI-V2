@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ARXI Order Confirmed</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="arxi.css">
+<style>
+/* Layout: confirmation headline, the order as a 3D lineup, then three next steps. Shown when Square sends a customer back after paying. */
+.hero{padding-block:44px 20px;border-bottom:0}
+.hero h1{font-size:clamp(36px,5.5vw,58px)}
+.hero h1 em{font-style:normal;color:var(--amber)}
+.ref{font-family:var(--mono);font-size:13px;color:var(--muted);margin-top:12px}
+.state{display:inline-flex;align-items:center;gap:8px;font-size:14px;padding:6px 12px;border-radius:999px;background:var(--raised);margin-top:16px}
+.state i{width:8px;height:8px;border-radius:50%;background:var(--muted)}
+.state.ok{background:#E3F3EA;color:var(--green)}.state.ok i{background:var(--green)}
+.state.warn{background:#FFF4E5;color:#8A5300}.state.warn i{background:#C27C0E}
+.lineup{position:relative;aspect-ratio:16/6;border-radius:14px;overflow:hidden;background:radial-gradient(120% 90% at 50% 30%,#FFFFFF 0%,#EEF1F5 55%,#E2E6EC 100%);border:1px solid var(--line);margin-top:28px}
+.lineup[hidden]{display:none}
+.next{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:32px 0 0;padding:0;list-style:none;counter-reset:s}
+.next li{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;counter-increment:s}
+.next li::before{content:counter(s);font:500 12px var(--mono);color:var(--amber);display:block;margin-bottom:6px}
+.next b{display:block;font-weight:600;margin-bottom:4px}
+.next span{font-size:14px;color:var(--muted)}
+.cta-row{display:flex;gap:10px;flex-wrap:wrap;margin:32px 0 80px}
+.unpaid{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px;margin-top:24px;display:grid;gap:12px;max-width:620px}
+.unpaid[hidden]{display:none}
+@media (max-width:760px){.next{grid-template-columns:1fr}.lineup{aspect-ratio:16/9}}
+</style>
+</head>
+<body>
+<header class="site">
+  <div class="wrap">
+    <a class="mark" href="index.html">ARXI<span>·</span>SYSTEMS</a>
+    <nav aria-label="Site">
+      <a href="index.html">Overview</a><a href="features.html#lite">Features</a><a href="rooms.html">Every room</a><a href="who.html">Who it's for</a><a href="connected.html">Connected</a><a href="store.html" data-cart>Store</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap">
+      <p class="eyebrow">Order</p>
+      <h1 id="h">Thank you. <em>It’s on the way.</em></h1>
+      <p class="lede" id="lede">Your order is in. Square is emailing your receipt now.</p>
+      <p class="state" id="state"><i></i><span id="state-t">Checking your payment…</span></p>
+      <p class="ref" id="ref"></p>
+
+      <div class="unpaid" id="unpaid" hidden>
+        <p style="margin:0"><b>Checkout wasn’t finished.</b> Nothing was charged, and your cart is still saved.</p>
+        <div class="cta-row" style="margin:0"><a class="btn" href="store.html">Back to your cart</a></div>
+      </div>
+
+      <div class="lineup" id="lineup" hidden></div>
+
+      <ol class="next" id="next">
+        <li><b>Receipt</b><span>Square emails your receipt. Reply to it with any questions about your order.</span></li>
+        <li><b>Built and shipped</b><span>Each display is assembled, tested and shipped by ARXI. Panels ship as they’re ready.</span></li>
+        <li><b>Plug it in</b><span>Join your Wi-Fi and pick what each display shows from your phone. With two or more, the hub finds them on its own.</span></li>
+      </ol>
+      <div class="cta-row">
+        <a class="btn" href="features.html#works">See what it works with</a>
+        <a class="btn ghost" href="rooms.html">Plan your rooms</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site"><div class="wrap"><span>ARXI Systems · ARXI makes</span><span>Thank you</span></div></footer>
+
+<script src="config.js"></script>
+<script src="matrix.js"></script>
+<script src="models3d.js"></script>
+<script src="cart.js"></script>
+<script>
+(function(){
+  const $=id=>document.getElementById(id),A=window.ARXI,q=new URLSearchParams(location.search);
+  const orderId=q.get('orderId')||q.get('order_id')||'',ref=(q.get('ref')||q.get('referenceId')||'').replace(/[^A-Z0-9-]/gi,'');
+  if(ref)$('ref').textContent='Order '+ref;
+  const cart=A.load();
+  function state(t,cls){$('state-t').textContent=t;$('state').className='state'+(cls?' '+cls:'')}
+  function paid(total){
+    state('Payment received'+(total!=null?' · '+A.fmt(total):''),'ok');
+    showLineup();
+    try{localStorage.setItem('arxi-last-order',JSON.stringify({ref,at:Date.now(),lines:cart.lines}))}catch(e){}
+    A.save(A.empty());
+  }
+  function notPaid(){
+    $('h').innerHTML='Almost there.';$('lede').textContent='';$('state').hidden=true;$('next').hidden=true;$('unpaid').hidden=false;
+  }
+  function showLineup(){
+    let lines=cart.lines;if(!lines.length){try{const l=JSON.parse(localStorage.getItem('arxi-last-order')||'null');if(l&&l.ref===ref)lines=l.lines||[]}catch(e){}}
+    if(!lines.length)return;
+    const go=()=>{const box=$('lineup');box.hidden=false;
+      const m=window.ArxiLineup&&ArxiLineup(box,{bar:[{label:'Hello',lines:[{t:'THANK YOU',c:'#38F28A'},{t:'SEE YOU SOON',c:'flow'}],icon:'heart',hold:99999}],
+        panel:[{label:'Hello',lines:[{t:'THANK YOU',c:'#38F28A'},{t:'ORDER IN',c:'#F4F1FF'},{t:'SEE YOU',c:'#3FE0FF'}],icon:'heart',hold:99999}]});
+      if(!m){box.hidden=true;return}
+      m.setItems(lines.map(l=>({kind:l.product==='panel'?'panel':'bar',finish:l.finish||'black'})).sort((a,b)=>a.kind===b.kind?0:a.kind==='panel'?-1:1))};
+    if(window.THREE)go();else{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';s.onload=go;document.head.appendChild(s)}
+  }
+  /* Square adds the order id when it sends the customer back. Confirm it was paid before clearing the cart. */
+  if(orderId&&window.ARXI_CHECKOUT_URL){
+    fetch(window.ARXI_CHECKOUT_URL.replace(/\/$/,'')+'/status?order_id='+encodeURIComponent(orderId)).then(r=>r.json()).then(j=>{if(j.paid)paid(j.total);else notPaid()})
+      .catch(()=>{state('We’ll confirm your payment by email.','warn');showLineup()});
+  }else if(orderId||q.get('transactionId')||q.get('checkoutId')){paid(null)}
+  else{state('Your receipt comes from Square by email.','warn');showLineup()}
+})();
+</script>
+</body>
+</html>

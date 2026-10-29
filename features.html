@@ -1,0 +1,783 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ARXI Features</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="arxi.css">
+<style>
+/* Layout: product switcher, then hero with live preview; feature groups as a spec-sheet grid; specs + box; three-way compare. */
+.p-hero{padding-block:40px 64px}
+.p-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:40px;align-items:center;margin-top:32px}
+.p-hero h1{font-size:clamp(41px,9vw,77px);margin-top:12px}
+.p-hero .lede{margin-top:18px}
+.price-line{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-top:24px}
+.price-line .amt{font-size:64px;color:var(--amber)}
+.price-line span{font-family:var(--mono);font-size:13px;color:var(--muted)}
+.p-hero .cta-row{margin-top:24px}
+.best{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px;align-items:center}
+.best .eyebrow{margin-right:4px}
+
+.groups{display:grid;gap:44px}
+.group h3{font-size:28px;margin-bottom:16px;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.group h3 small{font-family:var(--mono);font-size:12px;font-weight:400;letter-spacing:.1em;color:var(--muted)}
+.feat{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.f{background:var(--surface);padding:20px;display:grid;gap:8px;align-content:start;min-width:0}
+.f-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.f b{font-weight:600}
+.f p{font-size:14px;color:var(--muted)}
+.f .state{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap;color:var(--amber)}
+.f.off{background:var(--bg)}
+.f.off b,.f.off p{opacity:.5}
+.f.off .state{color:var(--cyan)}
+.f.plus .state{color:var(--amber)}
+.f .bdg{justify-self:start;margin-top:2px}
+
+.specs-grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:28px;align-items:start}
+.specs{margin:0;border:1px solid var(--line);border-radius:4px}
+.specs div{display:grid;grid-template-columns:150px minmax(0,1fr);gap:16px;padding:13px 18px;border-bottom:1px solid var(--line)}
+.specs div:last-child{border-bottom:0}
+.specs dt{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding-top:2px}
+.specs dd{margin:0;font-size:15px}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:22px;display:grid;gap:14px}
+.box h3{font-size:24px}
+.box ul{margin:0;padding:0;list-style:none;display:grid;gap:10px;font-size:15px}
+.box li{display:grid;grid-template-columns:14px 1fr;gap:10px}
+.box li::before{content:"";width:6px;height:6px;margin-top:9px;border-radius:50%;background:var(--amber);box-shadow:0 0 8px var(--amber)}
+.box .fine{font-size:13px;color:var(--muted)}
+
+td{color:var(--muted);font-size:14px}
+thead a{color:var(--fg);text-decoration:none}
+thead a:hover{color:var(--amber)}
+th.cur,td.cur{background:rgba(31,79,224,.06)}
+thead th.cur{color:var(--amber)}
+.f-ctl{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.legend{display:flex;gap:6px;flex-wrap:wrap}
+.dots{display:flex;gap:6px}
+details.xc.off>summary b{opacity:.5}
+.boxlist{margin:0;padding:0;list-style:none;display:grid;gap:10px;font-size:15px}
+.boxlist li{display:grid;grid-template-columns:14px 1fr;gap:10px}
+.boxlist li::before{content:"";width:6px;height:6px;margin-top:9px;border-radius:50%;background:var(--amber);box-shadow:0 0 8px var(--amber)}
+.fine{font-size:13px;color:var(--muted);margin-top:14px}
+.stage3d{position:relative;aspect-ratio:16/10;border-radius:14px;overflow:hidden;background:radial-gradient(120% 90% at 50% 30%,#FFFFFF 0%,#EEF1F5 55%,#E2E6EC 100%);border:1px solid var(--line)}
+.seg3{display:inline-flex;background:var(--raised);border-radius:999px;padding:3px;gap:2px}
+.seg3[hidden]{display:none}
+.seg3 button{font:500 13px var(--body);color:var(--muted);background:none;border:0;border-radius:999px;padding:7px 16px;cursor:pointer}
+.seg3 button[aria-pressed="true"]{background:var(--surface);color:var(--fg);box-shadow:0 1px 2px rgba(13,17,23,.12)}
+@media (max-width:860px){.p-grid,.specs-grid{grid-template-columns:1fr}.specs div{grid-template-columns:120px minmax(0,1fr)}}
+
+/* Works with */
+#works .reqs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid var(--line);border-radius:4px;margin-top:36px}
+#works .req{padding:18px 20px;border-right:1px solid var(--line);display:grid;gap:6px;min-width:0}
+#works .req:last-child{border-right:0}
+#works .req b{font-weight:600}
+#works .req span{font-size:14px;color:var(--muted)}
+#works .req .k{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber)}
+#works .controls{display:grid;gap:14px;margin-bottom:24px}
+#works .ctl-row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+#works .search{flex:1 1 240px;max-width:360px;font:15px var(--body);color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:10px 16px}
+#works .search::placeholder{color:var(--muted)}
+#works .search:focus{outline:2px solid var(--amber);outline-offset:2px}
+#works .chips{display:flex;gap:8px;flex-wrap:wrap}
+#works .chip{font:500 12px var(--mono);letter-spacing:.04em;color:var(--muted);background:none;border:1px solid var(--line);border-radius:999px;padding:7px 12px;cursor:pointer}
+#works .chip:hover{color:var(--fg);border-color:var(--muted)}
+#works .chip[aria-pressed="true"]{color:#FFFFFF;background:var(--amber);border-color:var(--amber)}
+#works .chip .n{opacity:.6;margin-left:4px}
+#works .ctl-label{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+#works .tier-ctl{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+#works .dir{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:24px;align-items:start}
+#works .cat{margin-bottom:28px}
+#works .cat:last-child{margin-bottom:0}
+#works .cat h3{font-size:22px;margin-bottom:12px;display:flex;gap:10px;align-items:baseline}
+#works .cat h3 small{font-family:var(--mono);font-size:11px;font-weight:400;color:var(--muted);letter-spacing:.08em}
+#works .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+#works .card{all:unset;box-sizing:border-box;cursor:pointer;background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:14px 16px;display:grid;gap:8px;align-content:start;min-width:0}
+#works .card:hover{border-color:var(--muted)}
+#works .card:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+#works .card[aria-pressed="true"]{border-color:var(--amber);background:var(--raised)}
+#works .card-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+#works .card b{font-weight:600}
+#works .card p{font-size:13px;color:var(--muted);line-height:1.4}
+#works .st{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}
+#works .st.inc{color:var(--amber)}
+#works .st.add{color:var(--cyan)}
+#works .st.sys{color:var(--green)}
+#works .card.dim{opacity:.38}
+#works .card .tiers{display:flex;gap:4px;flex-wrap:wrap}
+#works .t{font-family:var(--mono);font-size:10px;border:1px solid var(--line);border-radius:3px;padding:1px 5px;color:var(--muted)}
+#works .t.on{border-color:#C7D3FA;color:var(--fg)}
+#works .empty{padding:28px;border:1px dashed var(--line);border-radius:4px;color:var(--muted)}
+#works .detail{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:24px;display:grid;gap:18px;min-width:0;position:sticky;top:calc(env(safe-area-inset-top,0px) + 76px)}
+#works .detail h2{font-size:clamp(25px,4vw,33px)}
+#works .d-meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+#works .d-desc{color:var(--muted);font-size:15px}
+#works .d-block{display:grid;gap:8px}
+#works .d-block ul,#works .d-block ol{margin:0;padding-left:20px;display:grid;gap:6px;font-size:14px}
+#works .d-block ol li::marker{font-family:var(--mono);color:var(--amber)}
+#works .d-tiers{display:flex;gap:6px;flex-wrap:wrap}
+#works .d-tiers .t{font-size:11px;padding:3px 8px}
+#works .nope{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+@media (max-width:640px){#works .nope{grid-template-columns:1fr}}
+#works .no-card{border:1px dashed var(--line);border-radius:4px;padding:22px;display:grid;gap:8px;align-content:start}
+#works .no-card h3{font-size:24px}
+#works .no-card p{font-size:15px;color:var(--muted)}
+#works .no-card .tag{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--red)}
+#works .no-card .tag.later{color:var(--muted)}
+#works .fine{font-size:12px;color:var(--muted);margin-top:28px;max-width:80ch}
+@media (max-width:960px){#works .dir{grid-template-columns:1fr}
+#works .detail{position:static;order:-1}}
+
+@media (max-width:760px){#works .reqs{grid-template-columns:repeat(2,minmax(0,1fr))}
+#works .req:nth-child(2){border-right:0}
+#works .req:nth-child(-n+2){border-bottom:1px solid var(--line)}}
+
+@media (max-width:440px){#works .reqs{grid-template-columns:1fr}
+#works .req{border-right:0;border-bottom:1px solid var(--line)}
+#works .req:last-child{border-bottom:0}}
+
+/* Upcoming */
+#upcoming .totals{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;border:1px solid var(--line);border-radius:4px;margin-top:36px}
+#upcoming .tot{all:unset;box-sizing:border-box;cursor:pointer;padding:20px 22px;border-right:1px solid var(--line);display:grid;gap:8px;align-content:start;min-width:0}
+#upcoming .tot:last-child{border-right:0}
+#upcoming .tot:hover{background:var(--surface)}
+#upcoming .tot:focus-visible{outline:2px solid var(--amber);outline-offset:-3px}
+#upcoming .tot[aria-pressed="true"]{background:var(--raised)}
+#upcoming .tot .num{font-family:var(--display);font-weight:600;font-size:41px;line-height:1;font-variant-numeric:tabular-nums}
+#upcoming .tot.now .num{color:var(--green)}
+#upcoming .tot.progress .num{color:var(--cyan)}
+#upcoming .tot.build .num{color:var(--amber)}
+#upcoming .tot p{font-size:14px;color:var(--muted)}
+#upcoming .updated{margin-top:14px;font-family:var(--mono);font-size:12px;color:var(--muted)}
+#upcoming .controls{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:24px}
+#upcoming .search{flex:1 1 220px;max-width:320px;font:15px var(--body);color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:10px 16px}
+#upcoming .search::placeholder{color:var(--muted)}
+#upcoming .search:focus{outline:2px solid var(--amber);outline-offset:2px}
+#upcoming .chips{display:flex;gap:8px;flex-wrap:wrap}
+#upcoming .chip{font:500 12px var(--mono);letter-spacing:.04em;color:var(--muted);background:none;border:1px solid var(--line);border-radius:999px;padding:7px 12px;cursor:pointer}
+#upcoming .chip:hover{color:var(--fg);border-color:var(--muted)}
+#upcoming .chip[aria-pressed="true"]{color:#FFFFFF;background:var(--amber);border-color:var(--amber)}
+#upcoming .board{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:start}
+#upcoming .lane{display:grid;gap:0;align-content:start;min-width:0}
+#upcoming .lane .lane-note{margin:8px 0 6px}
+#upcoming .lane details.xc>summary .area{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+#upcoming .showall{margin-top:12px;justify-self:start;font:500 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--amber);background:none;border:1px solid var(--amber-dim);border-radius:999px;padding:8px 14px;cursor:pointer}
+#upcoming .showall:hover{border-color:var(--amber)}
+#upcoming .lane-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding-bottom:10px;border-bottom:2px solid var(--line)}
+#upcoming .lane.now .lane-head{border-color:#BFE5CC}
+#upcoming .lane.progress .lane-head{border-color:#BFE3E1}
+#upcoming .lane.build .lane-head{border-color:var(--amber-dim)}
+#upcoming .lane-head h2{font-size:21px}
+#upcoming .lane-head span{font-family:var(--mono);font-size:12px;color:var(--muted)}
+#upcoming .lane-note{font-size:13px;color:var(--muted)}
+#upcoming .item{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:14px 16px;display:grid;gap:6px;min-width:0}
+#upcoming .lane.build .item{background:none;border-style:dashed}
+#upcoming .item-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+#upcoming .item b{font-weight:600}
+#upcoming .item .area{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+#upcoming .item p{font-size:13px;color:var(--muted);line-height:1.45}
+#upcoming .item .on{font-family:var(--mono);font-size:11px;color:var(--fg);opacity:.75}
+#upcoming .empty{font-size:13px;color:var(--muted);padding:12px 0}
+@media (max-width:900px){#upcoming .board{grid-template-columns:1fr}
+#upcoming .lane{margin-bottom:20px}}
+
+@media (max-width:620px){#upcoming .totals{grid-template-columns:1fr}
+#upcoming .tot{border-right:0;border-bottom:1px solid var(--line)}
+#upcoming .tot:last-child{border-bottom:0}}
+
+#upcoming .board{grid-template-columns:repeat(2,minmax(0,1fr))}
+#upcoming .totals{grid-template-columns:repeat(2,minmax(0,1fr));margin:0 0 8px}
+@media (max-width:900px){#upcoming .board{grid-template-columns:1fr!important}}
+</style>
+</head>
+<body>
+<header class="site">
+  <div class="wrap">
+    <a class="mark" href="index.html">ARXI<span>·</span>SYSTEMS</a>
+    <nav aria-label="Site">
+      <a href="index.html">Overview</a><a href="features.html#lite" aria-current="page">Features</a><a href="rooms.html">Every room</a><a href="who.html">Who it's for</a><a href="connected.html">Connected</a><a href="store.html" data-cart>Store</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="p-hero">
+    <div class="wrap">
+      <nav class="seg" aria-label="Choose a product" id="switch">
+        <a href="#lite" data-p="lite">Lite Bar</a><a href="#pro-bar" data-p="pro-bar">Pro Bar</a><a href="#pro-panel" data-p="pro-panel">Pro Panel</a>
+      </nav>
+      <div class="p-grid">
+        <div>
+          <p class="eyebrow" id="p-eyebrow">ARXI Bar · Tier 01</p>
+          <h1 id="p-name">Lite Bar</h1>
+          <p class="lede" id="p-pitch"></p>
+          <div class="price-line"><span class="amt" id="p-price">$159</span><span id="p-note"></span></div>
+          <div class="best" id="p-best"></div>
+          <div class="cta-row"><a class="btn" href="store.html">Shop now</a><a class="btn ghost" href="rooms.html">See it in your rooms</a></div>
+        </div>
+        <div>
+          <div class="stage3d" id="pm3d"></div>
+          <div class="bezel" id="pm-flat" hidden><canvas id="pm" width="880" height="220" aria-label="Live preview of this display"></canvas></div>
+          <div class="bezel-meta"><span id="pm-label"></span><span id="pm-size"></span></div>
+          <div class="seg3" role="group" aria-label="Finish" id="pm-fin" hidden style="margin-top:12px">
+            <button type="button" data-f="black" aria-pressed="true">Black</button>
+            <button type="button" data-f="white" aria-pressed="false">White</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="eyebrow">Everything it does</p>
+        <h2 id="f-title">Lite Bar features</h2>
+        <p>Open a group, then tap any feature for the details.</p>
+      </div>
+      <div class="f-ctl">
+        <div class="seg" id="scope" role="radiogroup" aria-label="Which features to show">
+          <button type="button" role="radio" data-v="mine" aria-selected="true" aria-checked="true">This model</button>
+          <button type="button" role="radio" data-v="all" aria-selected="false" aria-checked="false">Everything</button>
+        </div>
+      </div>
+      <div id="groups"></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="sec-head"><p class="eyebrow">The details</p><h2>Specs &amp; comparison</h2></div>
+      <details class="acc"><summary><span class="t" id="s-title">Tech specs</span></summary><div class="acc-body"><dl class="specs" id="specs"></dl></div></details>
+      <details class="acc"><summary><span class="t">In the box</span></summary><div class="acc-body"><ul class="boxlist" id="inbox"></ul><p class="fine">Every unit is assembled, flashed and tested by ARXI. Sizing and mounting are confirmed in your quote.</p></div></details>
+      <details class="acc"><summary><span class="t">Compare all three</span><span class="meta">Lite Bar · Pro Bar · Pro Panel</span></summary><div class="acc-body"><div class="table-scroll"><table id="cmp"></table></div></div></details>
+    </div>
+  </section>
+
+  <section id="works">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="eyebrow">Works with</p>
+        <h2>What it connects to</h2>
+        <p>Pick one to see it on the display, what you need, and how it’s set up.</p>
+      </div>
+
+      <div class="controls">
+        <div class="ctl-row">
+          <input class="search" id="q" type="search" placeholder="Search, e.g. Sonos, calendar, lights" aria-label="Search integrations">
+          <div class="tier-ctl"><span class="ctl-label">Works on</span>
+            <div class="seg" id="tier" role="radiogroup" aria-label="Filter by display">
+              <button type="button" role="radio" data-t="all" aria-selected="true" aria-checked="true">All</button>
+              <button type="button" role="radio" data-t="L" aria-selected="false" aria-checked="false">Lite</button>
+              <button type="button" role="radio" data-t="P" aria-selected="false" aria-checked="false">Pro Bar</button>
+              <button type="button" role="radio" data-t="N" aria-selected="false" aria-checked="false">Panel</button>
+              <button type="button" role="radio" data-t="C" aria-selected="false" aria-checked="false">2+</button>
+            </div>
+          </div>
+        </div>
+        <div class="ctl-row"><div class="chips" id="cats" role="group" aria-label="Filter by category"></div></div>
+      </div>
+
+      <div class="dir">
+        <div id="list" aria-live="polite"></div>
+        <aside class="detail" aria-labelledby="d-name">
+          <div class="d-meta"><span id="d-status" hidden></span><span class="ctl-label" id="d-cat"></span></div>
+          <h2 id="d-name">Sonos</h2>
+          <p class="d-desc" id="d-desc"></p>
+          <div>
+            <div class="bezel"><canvas id="d-canvas" width="880" height="220" aria-label="What this looks like on the display"></canvas></div>
+            <div class="bezel-meta"><span id="d-label">On the display</span><span><b>Bar</b> · two lines of text</span></div>
+          </div>
+          <div class="d-block"><span class="ctl-label">Works on</span><div class="d-tiers" id="d-tiers"></div></div>
+          <div class="d-block"><span class="ctl-label">You'll need</span><ul id="d-needs"></ul></div>
+          <div class="d-block"><span class="ctl-label">Setup</span><ol id="d-setup"></ol></div>
+        </aside>
+      </div>
+      <details class="acc" style="margin-top:28px"><summary><span class="t">What you need</span><span class="meta">Wi-Fi, a browser, an outlet</span></summary><div class="acc-body"><div class="reqs" aria-label="What every display needs">
+        <div class="req"><span class="k">Network</span><b>2.4 GHz Wi-Fi</b><span>Most home routers and mesh systems already broadcast it.</span></div>
+        <div class="req"><span class="k">Settings</span><b>Any web browser</b><span>A phone or computer on the same Wi-Fi. No app to install.</span></div>
+        <div class="req"><span class="k">Power</span><b>A wall outlet</b><span>The adapter is in the box.</span></div>
+        <div class="req"><span class="k">Internet</span><b>For public feeds</b><span>Scores, weather and lyrics. Local devices work without it.</span></div>
+      </div></div></details>
+      <details class="acc"><summary><span class="t">What it won't do</span><span class="meta">Voice assistants, cameras, HomeKit and more</span></summary><div class="acc-body">
+      <div class="nope">
+        <div class="no-card"><span class="tag">By design</span><h3>Voice assistants</h3><p>No Alexa, Google Assistant or Siri inside. The mic measures loudness for the light and never listens for words or records.</p></div>
+        <div class="no-card"><span class="tag">By design</span><h3>Cameras</h3><p>Presence comes from mmWave radar, which senses distance and movement but never captures images.</p></div>
+        <div class="no-card"><span class="tag later">Not yet</span><h3>HomeKit, Matter &amp; SmartThings</h3><p>No direct support today. If you run Home Assistant, it can bridge many of these devices to your display.</p></div>
+        <div class="no-card"><span class="tag later">Not yet</span><h3>5 GHz-only Wi-Fi</h3><p>The displays need a 2.4 GHz network. Most routers broadcast both, so this rarely comes up.</p></div>
+      </div>
+      </div></details>
+    </div>
+  </section>
+
+  <section id="upcoming">
+    <div class="wrap">
+      <div class="sec-head"><p class="eyebrow">Upcoming</p><h2>Coming next</h2><p>What we're building now, and things we can build for you. Ask about any of them in your order.</p></div>
+            <div class="controls">
+        <div class="chips" id="areas" role="group" aria-label="Filter by area"></div>
+        <input class="search" id="rq" type="search" placeholder="Search, e.g. lyrics, calendar, Twitch" aria-label="Search features">
+      </div>
+      <div class="board" id="board"></div>
+    </div>
+  </section>
+
+  <section class="cta-band">
+    <div class="wrap">
+      <div><p class="eyebrow">Buy two or more</p><h2>They connect into one system</h2></div>
+      <div class="cta-row"><a class="btn" href="connected.html">Connected &amp; advanced features</a><a class="btn ghost" href="store.html">Store</a></div>
+    </div>
+  </section>
+</main>
+
+<footer class="site"><div class="wrap"><span>ARXI Systems · ARXI makes</span><span>ARXI Bar &amp; Panel · Features</span></div></footer>
+
+<script src="matrix.js"></script>
+<script src="models3d.js"></script>
+<script src="cart.js"></script>
+<script>
+(function(){
+  const {AMB,CY,WH,RED,GRN}=ArxiMatrix.C;
+  const CATS=['Music','Sports','Weather','Calendar & messages','Smart home','Lighting','Around town','Numbers','Streaming','Your screens'];
+  const TIER_NAMES={L:'Lite Bar',P:'Pro Bar',N:'Pro Panel',C:'2+ displays'};
+  // status: inc | add | sys ; tiers: L P N C
+  const I=[
+    {id:'sonos',name:'Sonos',cat:'Music',status:'now',tiers:'PNC',sum:'Whatever your Sonos speaker is playing.',
+     desc:'The display reads what your Sonos speaker is playing, from any app: Spotify, Apple Music and more. It shows now playing and drives synced lyrics and lyric icons. There are no music accounts to link.',
+     needs:['A Sonos speaker on the same home network'],setup:['The display finds your speakers on its own','Pick which speaker or room it follows'],
+     scenes:[{label:'Now playing',icon:'note',lines:[{t:'LIVING RM',c:GRN},{t:'MIDNIGHT DRIVE - THE LOW HOURS',c:WH}]}]},
+    {id:'lyrics',name:'Synced lyrics',cat:'Music',status:'now',tiers:'PNC',sum:'Lyrics scroll line by line with the song.',
+     desc:'Lyrics timed to the song, fetched from a free public lyrics library when a track starts.',
+     needs:['A Sonos or Denon HEOS speaker','Internet for the lyric lookup'],setup:['Nothing to set up. It turns on with your music source'],
+     scenes:[{label:'Synced lyrics',icon:'star',iconColor:AMB,lines:[{t:'LYRICS',c:AMB},{t:'CITY LIGHTS ON THE WATER TONIGHT',c:WH}]}]},
+    {id:'plex',name:'Plex',cat:'Music',status:'build',tiers:'PNC',sum:'Now playing from your Plex server.',
+     desc:'For homes that play music from their own server. Shows what is playing from your own Plex Media Server.',
+     needs:['Plex Media Server on your home network'],setup:['Sign in to Plex once on the settings page','Pick which player it follows'],
+     scenes:[{label:'Plex now playing',icon:'note',lines:[{t:'NOW PLAY',c:AMB},{t:'TV ROOM - SEASON 2 EPISODE 4',c:WH}]}]},
+    {id:'jellyfin',name:'Jellyfin',cat:'Music',status:'build',tiers:'PNC',sum:'Now playing from your Jellyfin server.',
+     desc:'The same now-playing view for homes that run Jellyfin.',
+     needs:['Jellyfin server on your home network'],setup:['Add your server address and an API key on the settings page'],
+     scenes:[{label:'Jellyfin now playing',icon:'note',lines:[{t:'NOW PLAY',c:CY},{t:'DEN - LATE NIGHT RECORDS',c:WH}]}]},
+
+    {id:'heos',name:'Denon HEOS',cat:'Music',status:'now',tiers:'PNC',sum:'Whatever your HEOS speaker is playing.',
+     desc:'The same as Sonos for Denon and Marantz HEOS speakers: now playing, synced lyrics and lyric icons, from any app that plays to the speaker.',
+     needs:['A HEOS speaker on the same home network'],setup:['The display finds your speakers on its own','Pick which speaker it follows'],
+     scenes:[{label:'HEOS now playing',icon:'note',lines:[{t:'KITCHEN',c:CY},{t:'SLOW BURN - ROOM TONE',c:WH}]}]},
+    {id:'spotify',name:'Spotify, Apple Music & more',cat:'Music',status:'now',tiers:'PNC',sum:'Any app you play to your speaker.',
+     desc:'ARXI doesn’t sign in to Spotify or Apple Music. Play from any app to your Sonos or Denon HEOS speaker, and the display picks it up from the speaker.',
+     needs:['A Sonos or Denon HEOS speaker','Your music app of choice'],setup:['Play from your app to the speaker','Nothing to link or sign in to'],
+     scenes:[{label:'From any app',icon:'note',lines:[{t:'NOW PLAY',c:GRN},{t:'ON REPEAT - LATE SET',c:WH}]}]},
+
+    {id:'scores',name:'Live scores',cat:'Sports',status:'now',tiers:'LPNC',sum:'NFL, NBA and college football games on today.',
+     desc:'Today’s games across the NFL, NBA and college football, live at game time. Finals stay up until the 4 AM reset.',
+     needs:['Internet'],setup:['Pick your teams on the settings page, or follow every game'],
+     scenes:[{label:'Live score',lines:[{t:'NYG 17 Q3',c:CY},{t:'PHI 21 4:12',c:AMB}]}]},
+    {id:'gameday',name:'Gameday dashboard',cat:'Sports',status:'now',tiers:'C',sum:'A full scoreboard on any screen, synced with your displays.',
+     desc:'The hub’s scoreboard page. It parses scores for every display and shows what each one is doing, on a TV, laptop or phone.',
+     needs:['Two or more ARXI displays (hub included)','A browser on your home Wi-Fi'],setup:['Open the hub’s address in any browser','Bookmark it or leave it up on a TV'],
+     scenes:[{label:'Hub: today’s games',lines:[{t:'4 GAMES',c:CY},{t:'NEXT 8:15 NYG AT PHI',c:AMB}]}]},
+
+    {id:'weather',name:'Weather',cat:'Weather',status:'now',tiers:'LPNC',sum:'Current conditions plus today’s high and low.',
+     desc:'Temperature, conditions and today’s high and low from a free public forecast service.',
+     needs:['Internet','Your ZIP code or city'],setup:['Enter your location on the settings page'],
+     scenes:[{label:'Weather',icon:'sun',lines:[{t:'68* CLEAR',c:AMB},{t:'H 74 L 58',c:WH}]}]},
+    {id:'nws',name:'Severe weather alerts',cat:'Weather',status:'progress',tiers:'LPNC',sum:'Warnings for your county, in amber.',
+     desc:'National Weather Service warnings for your county take over the display, then clear when the alert ends. In a connected house, every display shows it at once.',
+     needs:['Internet','A US address'],setup:['Uses the location you already entered','Choose which alert types interrupt the display'],
+     scenes:[{label:'Weather alert',icon:'bolt',iconColor:AMB,lines:[{t:'WARNING',c:RED},{t:'SEVERE THUNDERSTORM UNTIL 9:30 PM',c:AMB}]}]},
+    {id:'sky',name:'Sunrise, sunset & air quality',cat:'Weather',status:'now',tiers:'LPNC',sum:'Light hours and the outdoor air reading.',
+     desc:'Today’s sunrise and sunset, plus the outdoor air quality index.',
+     needs:['Internet'],setup:['Uses the location you already entered'],
+     scenes:[{label:'Sunrise & air',icon:'sun',lines:[{t:'SUN UP 7:24',c:AMB},{t:'AIR 32 GOOD',c:GRN}]}]},
+
+    {id:'gcal',name:'Google Calendar',cat:'Calendar & messages',status:'progress',tiers:'LPNC',sum:'Today’s plans each morning.',
+     desc:'Shows today’s events and a heads-up before each one starts. Works with a shared family calendar.',
+     needs:['A Google Calendar','Its private calendar link (iCal format)'],setup:['Copy the private link from Google Calendar settings','Paste it on the display’s settings page'],
+     scenes:[{label:'Calendar',icon:'cal',lines:[{t:'TODAY',c:AMB},{t:'SOCCER 5:30 - DINNER 6:30',c:WH}]}]},
+    {id:'ical',name:'iCloud & Outlook calendars',cat:'Calendar & messages',status:'progress',tiers:'LPNC',sum:'Any calendar with a shareable link.',
+     desc:'Any calendar that can share an iCal link, including iCloud and Outlook.',
+     needs:['A calendar share link (iCal format)'],setup:['Turn on sharing for the calendar and copy its link','Paste it on the settings page'],
+     scenes:[{label:'Calendar',icon:'cal',lines:[{t:'TOMORROW',c:CY},{t:'DENTIST 9 AM',c:WH}]}]},
+    {id:'ntfy',name:'Messages from your phone',cat:'Calendar & messages',status:'now',tiers:'LPNC',sum:'Send a note and it shows on the display.',
+     desc:'Type a message on the dashboard from your phone’s browser. It shows over whatever is on the display for 5 to 60 seconds, in the colour you pick. Sending from anywhere, through a push app, is something we can build.',
+     needs:['A phone on the same Wi-Fi'],setup:['Open the dashboard on your phone','Choose Send a message, type it and send'],
+     scenes:[{label:'Message',lines:[{t:'MESSAGE',c:GRN},{t:'DINNER\'S READY - COME DOWN',c:WH}]}]},
+
+    {id:'hass',name:'Home Assistant',cat:'Smart home',status:'build',tiers:'PNC',sum:'Doors, garage, washer and more.',
+     desc:'If you run Home Assistant, any sensor or device in it can show up on the display: the garage left open, the front door unlocked, the washer done.',
+     needs:['Home Assistant on your home network'],setup:['Add the ARXI display in Home Assistant over MQTT','Choose which events show up and how'],
+     scenes:[{label:'Garage alert',icon:'alert',iconColor:RED,lines:[{t:'GARAGE',c:RED},{t:'DOOR OPEN 14 MIN',c:WH}]}]},
+    {id:'mqtt',name:'MQTT',cat:'Smart home',status:'build',tiers:'PNC',sum:'For tinkerers who run their own broker.',
+     desc:'Publish text, colors or alerts to the display from any system that speaks MQTT.',
+     needs:['An MQTT broker on your network'],setup:['Enter your broker address on the settings page','Publish to the display’s topic'],
+     scenes:[{label:'MQTT message',lines:[{t:'PRINTER',c:CY},{t:'JOB DONE - 2H 14M',c:WH}]}]},
+
+    {id:'hue',name:'Philips Hue',cat:'Lighting',status:'build',tiers:'PNC',sum:'Team colors on a score, pulse with music.',
+     desc:'Hue lights flash your team’s colors on a score and can pulse along with sound-reactive mode.',
+     needs:['A Hue Bridge on your home network'],setup:['Press the button on the Hue Bridge when prompted','Pick which lights join in'],
+     scenes:[{label:'Touchdown + lights',lines:[{t:'TOUCHDOWN',c:GRN},{t:'LIGHTS: PHI GREEN',c:WH}]}]},
+    {id:'wled',name:'WLED',cat:'Lighting',status:'build',tiers:'PNC',sum:'LED strips that follow the display.',
+     desc:'WLED light strips match the display’s theme, flash on a score and move with the music.',
+     needs:['A WLED controller on your home network'],setup:['The display finds WLED devices on its own','Pick which strips join in'],
+     scenes:[{label:'Strips in sync',lines:[{t:'THEME',c:AMB},{t:'STRIPS: GAME NIGHT',c:CY}]}]},
+
+    {id:'transit',name:'Transit arrivals',cat:'Around town',status:'build',tiers:'LPNC',sum:'Live arrivals for your bus stop.',
+     desc:'Real-time arrivals for the stop you use, from transit agencies that publish a live feed.',
+     needs:['A transit agency with a real-time feed','Your stop number'],setup:['Enter your stop on the settings page','Choose the routes to show'],
+     scenes:[{label:'Next bus',icon:'bus',lines:[{t:'BUS 300',c:CY},{t:'6 MIN - NEXT 21',c:AMB}]}]},
+
+    {id:'market',name:'Stocks & crypto',cat:'Numbers',status:'build',tiers:'LPNC',sum:'A short ticker of what you follow.',
+     desc:'A scroll of the stocks or crypto you pick, updated through the day from free market data feeds.',
+     needs:['Internet'],setup:['Add your list of symbols on the settings page'],
+     scenes:[{label:'Ticker',icon:'up',iconColor:GRN,lines:[{t:'MARKETS',c:WH},{t:'SPY +0.4%  QQQ +0.7%  BTC -1.2%',c:GRN}]}]},
+    {id:'count',name:'Countdowns & moon phase',cat:'Numbers',status:'now',tiers:'LPNC',sum:'Days to a big date, and tonight’s moon.',
+     desc:'Countdowns to tip-off, a birthday or a trip, plus the moon phase. Calculated on the display, so it works without internet.',
+     needs:['Nothing extra'],setup:['Add your dates on the settings page'],
+     scenes:[{label:'Countdown',icon:'moon',lines:[{t:'TIP-OFF',c:AMB},{t:'IN 12 DAYS',c:WH}]}]},
+
+    {id:'twitch',name:'Twitch alerts & chat',cat:'Streaming',status:'build',tiers:'LPNC',sum:'Follows, subs and raids on the wall behind you.',
+     desc:'New followers, subs, raids and cheers flash on the display behind you on camera. Viewers can send a moderated message or colour change with a chat command.',
+     needs:['A Twitch channel'],setup:['Connect your channel once on the settings page','Choose which events show and how long'],
+     scenes:[{label:'Raid alert',icon:'heart',iconColor:AMB,lines:[{t:'RAID!',c:AMB},{t:'40 VIEWERS FROM NIGHTOWLS',c:WH}]}]},
+    {id:'youtube',name:'YouTube Live',cat:'Streaming',status:'build',tiers:'LPNC',sum:'Super Chats and new members on screen.',
+     desc:'Super Chats, new members and live viewer counts from YouTube Live, shown on the display.',
+     needs:['A YouTube channel with live streaming'],setup:['Connect your channel once on the settings page'],
+     scenes:[{label:'New member',icon:'star',iconColor:AMB,lines:[{t:'MEMBER',c:RED},{t:'WELCOME JORDAN',c:WH}]}]},
+    {id:'obs',name:'OBS',cat:'Streaming',status:'build',tiers:'LPNC',sum:'On-air sign, scene sync and an on-stream overlay.',
+     desc:'The display goes to an on-air look when you start streaming and changes with your OBS scenes. It can also appear as a pixel-perfect overlay in your stream.',
+     needs:['OBS Studio on your streaming computer'],setup:['Turn on OBS’s WebSocket server','Enter its address on the settings page'],
+     scenes:[{label:'On air',lines:[{t:'ON AIR',c:RED},{t:'LIVE 0:42:10',c:WH}]}]},
+    {id:'streamdeck',name:'Stream Deck',cat:'Streaming',status:'build',tiers:'LPNC',sum:'One button per mode, message or scene.',
+     desc:'Elgato Stream Deck buttons that switch house modes, show BRB, start a timer or post a message, with no browser in between.',
+     needs:['An Elgato Stream Deck'],setup:['Install the ARXI buttons','Drag a button onto a key'],
+     scenes:[{label:'BRB',lines:[{t:'BRB',c:AMB},{t:'BACK IN 5:00',c:WH}]}]},
+
+    {id:'browser',name:'Any web browser',cat:'Your screens',status:'now',tiers:'LPNC',sum:'Settings on your phone or computer.',
+     desc:'Every setting lives on a page served by the display itself. Chrome, Safari, Edge and Firefox all work, on a phone or a computer.',
+     needs:['A phone or computer on the same Wi-Fi'],setup:['Open the link on your quick-start card','Bookmark it'],
+     scenes:[{label:'Settings saved',lines:[{t:'SAVED',c:GRN},{t:'THEME: GAME NIGHT',c:WH}]}]},
+    {id:'live',name:'ARXI Live',cat:'Your screens',status:'now',tiers:'PNC',sum:'Every sensor reading, live, in your browser.',
+     desc:'A live view of what the display senses: sound level, radar distance and presence, and room light, plotted as it happens. Handy for tuning thresholds.',
+     needs:['A Pro Bar or Panel','A browser on your home Wi-Fi'],setup:['Open the Live page from the settings menu','Adjust thresholds while you watch the readings'],
+     scenes:[{label:'Presence: present',lines:[{t:'PRESENT',c:GRN},{t:'410 CM - STILL',c:CY}]}]}
+  ];
+  for(let k=I.length-1;k>=0;k--)if(I[k].status!=='now')I.splice(k,1);
+
+  const state={cat:'Music',tier:'all',q:'',sel:'sonos',st:'all'};
+  const $=id=>document.getElementById(id);
+  const mx=ArxiMatrix($('d-canvas'),{w:44,h:11,onLabel:t=>{$('d-label').textContent=t}});
+  const ST={now:'Working now',progress:'In progress',build:'We can build it'};
+
+  const catsEl=$('cats');
+  ['All',...CATS.filter(c=>I.some(i=>i.cat===c))].forEach(c=>{const b=document.createElement('button');b.type='button';b.className='chip';b.dataset.c=c;
+    b.innerHTML=c+'<span class="n">'+(c==='All'?I.length:I.filter(i=>i.cat===c).length)+'</span>';
+    b.addEventListener('click',()=>{state.cat=c;render()});catsEl.appendChild(b)});
+  document.querySelectorAll('#tier button').forEach(b=>b.addEventListener('click',()=>{state.tier=b.dataset.t;render()}));
+  document.querySelectorAll('#stf button').forEach(b=>b.addEventListener('click',()=>{state.st=b.dataset.s;render()}));
+  $('q').addEventListener('input',e=>{state.q=e.target.value.trim().toLowerCase();render()});
+
+  function tierHtml(t,big){return ['L','P','N','C'].map(k=>'<span class="t'+(t.includes(k)?' on':'')+'"'+(t.includes(k)?'':' aria-hidden="true"')+'>'+(big?TIER_NAMES[k]:({L:'Lite',P:'Pro',N:'Panel',C:'2+'})[k])+'</span>').join('')}
+
+  function render(){
+    catsEl.querySelectorAll('.chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.c===state.cat?'true':'false'));
+    document.querySelectorAll('#tier button').forEach(b=>{const on=b.dataset.t===state.tier;b.setAttribute('aria-selected',on);b.setAttribute('aria-checked',on)});
+    document.querySelectorAll('#stf button').forEach(b=>{const on=b.dataset.s===state.st;b.setAttribute('aria-selected',on);b.setAttribute('aria-checked',on)});
+    const list=$('list');list.innerHTML='';
+    const match=i=>(state.st==='all'||i.status===state.st)&&(state.cat==='All'||i.cat===state.cat)&&(!state.q||(i.name+' '+i.sum+' '+i.desc+' '+i.cat).toLowerCase().includes(state.q));
+    let shown=0;
+    CATS.forEach(c=>{
+      const items=I.filter(i=>i.cat===c&&match(i));if(!items.length)return;
+      const sec=document.createElement('div');sec.className='cat';
+      const works=items.filter(i=>state.tier==='all'||i.tiers.includes(state.tier)).length;
+      sec.innerHTML='<h3>'+c+' <small>'+(state.tier==='all'?items.length:works+' of '+items.length+' on '+TIER_NAMES[state.tier])+'</small></h3><div class="cards"></div>';
+      const grid=sec.querySelector('.cards');
+      items.forEach(i=>{
+        const ok=state.tier==='all'||i.tiers.includes(state.tier);
+        const b=document.createElement('button');b.type='button';b.className='card'+(ok?'':' dim');
+        b.setAttribute('aria-pressed',state.sel===i.id?'true':'false');
+        b.innerHTML='<span class="card-top"><b></b></span><p></p><span class="tiers">'+tierHtml(i.tiers)+'</span>';
+        b.querySelector('b').textContent=i.name;b.querySelector('p').textContent=i.sum;
+        b.setAttribute('aria-label',i.name+(ok?'':', not available on '+TIER_NAMES[state.tier]));
+        b.addEventListener('click',()=>{state.sel=i.id;render();showDetail(true);if(window.innerWidth<=960)document.querySelector('.detail').scrollIntoView({behavior:'smooth',block:'start'})});
+        grid.appendChild(b);shown++});
+      list.appendChild(sec)});
+    if(!shown)list.innerHTML='<p class="empty">Nothing matches that search. Try “lights”, “music” or “calendar”, or ask about it in your quote.</p>';
+  }
+  function showDetail(reset){
+    const i=I.find(x=>x.id===state.sel);
+    
+    $('d-cat').textContent=i.cat;$('d-name').textContent=i.name;$('d-desc').textContent=i.desc;
+    $('d-tiers').innerHTML=tierHtml(i.tiers,true);
+    $('d-needs').innerHTML='';i.needs.forEach(n=>{const li=document.createElement('li');li.textContent=n;$('d-needs').appendChild(li)});
+    $('d-setup').innerHTML='';i.setup.forEach(n=>{const li=document.createElement('li');li.textContent=n;$('d-setup').appendChild(li)});
+    if(reset)mx.setScenes(i.scenes);
+  }
+  render();showDetail(true);
+})();
+</script>
+<script>
+(function(){
+  // [area, name, description, status, works on]
+  const I=[
+    ['Display','Clock & 8 screen styles','12- or 24-hour time and date in eight styles and moods, plus a dim Night style.','now','All displays'],
+    ['Display','Screen rotation & colours','Pick the screens, their order, and colours from the style, your own, or your team’s.','now','All displays'],
+    ['Display','Show text & messages','Your own text, or a 5–60 second message over whatever is showing.','now','All displays'],
+    ['Display','Drawing canvas','Draw on the display pixel by pixel from a phone or computer.','now','All displays'],
+    ['Display','Holiday & birthday scenes','Seven holiday scenes and a birthday scene.','now','All displays'],
+    ['Display','Hourly chime','A quarter-hour chime with quiet hours.','now','All displays'],
+    ['Weather & time','Weather, forecast & air quality','Six weather scenes, a six-page forecast and the air quality index.','now','All displays'],
+    ['Weather & time','Moon phase & sun arc','Tonight’s moon and the day from sunrise to sunset.','now','All displays'],
+    ['Weather & time','Countdowns','Up to eight, including birthdays that repeat.','now','All displays'],
+    ['Weather & time','Timers & focus timer','Three timers, a stopwatch and 25/5 presets.','now','All displays'],
+    ['Weather & time','Wake-up & wind-down light','Daylight or red wake-up light; red or warm-sky wind-down.','now','All displays'],
+    ['Weather & time','Sunrise & sunset moments','A short scene at the real sunrise and sunset.','now','All displays'],
+    ['Music','Sonos & HEOS now playing','Whatever your Sonos or Denon HEOS speaker is playing, from any app.','now','Pro'],
+    ['Music','Synced lyrics','Timed to the song, with styles and word-by-word highlighting.','now','Pro'],
+    ['Music','Lyric icons','122 pictures triggered by 819 words in the lyrics.','now','Pro'],
+    ['Music','Sound-reactive light','Moves with the music. The mic measures loudness only.','now','Pro'],
+    ['Sports','Today’s games','NFL, NBA and college football: live, upcoming, then finals. Resets at 4 AM.','now','All displays'],
+    ['Sports','Game Day mode','Your favourite team’s game takes over, with a running game clock.','now','All displays'],
+    ['Sports','Play moments & celebrations','Timeouts, first downs, big plays, fourth downs, crunch time, touchdowns and wins.','now','All displays'],
+    ['Sports','Runs, clutch & upset watch','Scoring runs, close finishes and ranked teams in trouble.','now','All displays'],
+    ['Sports','TV delay sync','Holds the score until your TV shows the play.','now','All displays'],
+    ['Sports','Manual scoreboard','Your own teams, scores and colours for game night or a rec league.','now','All displays'],
+    ['Sports','Gameday dashboard','A browser scoreboard that feeds the hub and shows what each display is doing.','now','2+ displays'],
+    ['Sensors','Presence radar','Senses someone in the room, moving or still, and how far away.','now','Pro'],
+    ['Sensors','Room light sensor','Reads the room’s brightness, with thresholds you can calibrate.','now','Pro'],
+    ['Sensors','ARXI Live','Every sensor reading, live, in your browser.','now','Pro'],
+    ['Connected','Companion display','A second display with a shared theme, partner screens, a games slate and lyrics as pictures.','now','2+ displays'],
+    ['Connected','24 art visualizers','Sound-reactive art pieces for the companion display.','now','2+ displays'],
+    ['Connected','Skyline that follows the day','Sun, moon, stars and weather in real time, with a sunset moment on both screens.','now','2+ displays'],
+    ['Connected','House modes','Everyday, Game Day, Party, Chill and Night with one tap or a phone link.','now','All displays'],
+    ['Setup','Encrypted display link','Paired, encrypted link between hub and displays, with no router setup.','now','2+ displays'],
+    ['Setup','Browser dashboard, no app','Six workspaces of settings on your home Wi-Fi.','now','All displays'],
+    ['Setup','Saved Wi-Fi & time zone','Up to three Wi-Fi networks, your time zone and a device name.','now','All displays'],
+
+    ['Display','ARXI Panel','The taller display with three-line layouts and bigger text. Hardware and layouts in development.','progress','Panel'],
+    ['Weather & time','Calendars','Google, iCloud and Outlook by private link. A memory fix is in, and testing continues with real calendars.','progress','All displays'],
+    ['Weather & time','Morning briefing','Your day’s first events when you walk in the room.','progress','Pro'],
+    ['Weather & time','Severe weather alerts','Warnings for your county on every display at once.','progress','All displays'],
+    ['Weather & time','Weather moments','A thunderbolt hand-off between displays, snow on the clock digits and haze on bad-air days.','progress','All displays'],
+    ['Sensors','Wake & auto-dim','Brightens when someone walks in, fades when the room is empty.','progress','Pro'],
+    ['Sensors','Smart brightness','Brightness follows the room light and how close you are.','progress','Pro'],
+    ['Sensors','Clap control','One, two or three claps for an action, like switching house modes.','progress','Pro'],
+    ['Sensors','Loud-sound alert','A visual alert when the room gets loud.','progress','Pro'],
+    ['Sports','Volt, the ARXI character','Cameos on touchdowns and wins, dances in instrumental breaks, sings the chorus.','progress','All displays'],
+    ['Sports','Crowd moments','Kickoff face-offs, two-minute crowd waves, splash threes and on-fire runs.','progress','All displays'],
+    ['Connected','Mr Ross live painting','One landscape per song, painted layer by layer on the companion and signed 1/1.','progress','2+ displays'],
+    ['Connected','Three or more displays','Tested with two displays in one room today. Bigger homes are next.','progress','2+ displays'],
+    ['Connected','Faster hub','A faster hub chip for larger systems and more headroom.','progress','2+ displays'],
+    ['Setup','Setup hotspot','The display offers its own setup network if your Wi-Fi changes.','progress','All displays'],
+
+    ['Sensors','Temperature & humidity','Indoor readings with an added sensor.','build','Pro'],
+    ['Connected','Wakes only where people are','Only the rooms in use light up.','build','2+ displays'],
+    ['Connected','Scenes on a schedule','House modes that switch on their own at times you set.','build','All displays'],
+    ['Integrations','Philips Hue','Team colours on a score and lights that pulse with the music.','build','Pro'],
+    ['Integrations','WLED light strips','Strips that match the display’s theme and moments.','build','Pro'],
+    ['Integrations','Home Assistant & MQTT','Doors, garage, washer and any sensor you run.','build','Pro'],
+    ['Integrations','Plex & Jellyfin','Now playing from your own media server.','build','Pro'],
+    ['Integrations','Transit arrivals','Live arrivals for your stop from agencies with real-time feeds.','build','All displays'],
+    ['Integrations','Stocks & crypto','A ticker of what you follow.','build','All displays'],
+    ['Integrations','Push messages from anywhere','Send a message to the display when you aren’t home.','build','All displays'],
+    ['Streaming','Twitch alerts & chat','Follows, subs, raids and moderated chat commands on the wall.','build','All displays'],
+    ['Streaming','YouTube Live','Super Chats, new members and viewer counts.','build','All displays'],
+    ['Streaming','OBS on-air & scene sync','An on-air look when you go live, changing with your scenes.','build','All displays'],
+    ['Streaming','On-stream overlay','A pixel-perfect copy of the display as an overlay in your stream.','build','All displays'],
+    ['Streaming','Stream Deck buttons','One button per mode, message, timer or scene.','build','All displays'],
+    ['Streaming','Sub goals & subathon timer','Progress toward a goal and a timer that grows with support.','build','All displays'],
+    ['Display','Your logo & custom screens','Brand screens, custom pixel art or a screen built for your business.','build','All displays']
+  ];
+  for(let k=I.length-1;k>=0;k--){if(I[k][3]==='now')I.splice(k,1);else I[k][3]='next'}
+  const AREAS=['All','Display','Weather & time','Music','Sports','Sensors','Connected','Setup','Integrations','Streaming'];
+  const LANES=[['next','','']];
+  const state={area:'All',q:'',only:null,all:{}};
+  const $=id=>document.getElementById(id);
+  const ar=$('areas');
+  AREAS.forEach(a=>{const b=document.createElement('button');b.type='button';b.className='chip';b.textContent=a;b.dataset.a=a;b.addEventListener('click',()=>{state.area=a;render()});ar.appendChild(b)});
+  $('rq').addEventListener('input',e=>{state.q=e.target.value.trim().toLowerCase();render()});
+  document.querySelectorAll('.tot').forEach(t=>t.addEventListener('click',()=>{state.only=state.only===t.dataset.s?null:t.dataset.s;render();if(state.only&&window.innerWidth<=900)$('board').scrollIntoView({behavior:'smooth'})}));
+  function render(){
+    ar.querySelectorAll('.chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.a===state.area?'true':'false'));
+    document.querySelectorAll('.tot').forEach(t=>t.setAttribute('aria-pressed',state.only===t.dataset.s?'true':'false'));
+    const ok=i=>(state.area==='All'||i[0]===state.area)&&(!state.q||(i.join(' ')).toLowerCase().includes(state.q));
+    const board=$('board');board.innerHTML='';
+    LANES.filter(l=>!state.only||l[0]===state.only).forEach(([k,t,n])=>{
+      const items=I.filter(i=>i[3]===k&&ok(i));
+      const lane=document.createElement('div');lane.className='lane '+k;
+      lane.innerHTML='';
+      
+      if(!items.length){const e=document.createElement('p');e.className='empty';e.textContent='Nothing here for this filter.';lane.appendChild(e)}
+      const filtered=state.area!=='All'||state.q;
+      const lim=(filtered||state.all[k]||state.only)?items.length:Math.min(10,items.length);
+      items.slice(0,lim).forEach(i=>{const d=document.createElement('details');d.className='xc';
+        d.innerHTML='<summary><b></b><span class="area"></span></summary><div class="xb"><p></p><span class="how"></span></div>';
+        d.querySelector('b').textContent=i[1];d.querySelector('.area').textContent=i[0];d.querySelector('p').textContent=i[2];d.querySelector('.how').textContent='Works on: '+i[4];
+        lane.appendChild(d)});
+      if(lim<items.length){const b=document.createElement('button');b.type='button';b.className='showall';b.textContent='Show all '+items.length;
+        b.addEventListener('click',()=>{state.all[k]=true;render()});lane.appendChild(b)}
+      board.appendChild(lane)});
+    board.style.gridTemplateColumns='minmax(0,1fr)';
+  }
+  render();
+})();
+</script>
+<script>
+(function(){
+  const {AMB,CY,WH,RED,GRN}=ArxiMatrix.C;
+  // L = Lite Bar, P = Pro Bar, N = Pro Panel
+  const GROUPS=[
+    {name:'On the display',items:[
+      ['Clock & 8 screen styles','Large 12- or 24-hour time with the date, in eight styles and moods, plus a dim Night style.','LPN','now'],
+      ['Your screen rotation','Choose which screens appear, in what order, and how they change.','LPN','now'],
+      ['Screen colours','Colours from the style, your own two colours, or your team’s colours.','LPN','now'],
+      ['Weather, forecast & air quality','Six animated weather scenes, a six-page forecast and the outdoor air quality index.','LPN','now'],
+      ['Moon phase & sun arc','Tonight’s moon and a timeline of the day from sunrise to sunset.','LPN','now'],
+      ['Show text & messages','Put your own text on the display, or send a 5–60 second message over whatever is showing.','LPN','now'],
+      ['Drawing canvas','Draw on the display pixel by pixel from your phone or computer.','LPN','now'],
+      ['Holiday & birthday scenes','Seven holiday scenes and a birthday scene. New Year shows the coming year.','LPN','now'],
+      ['Hourly chime','A quarter-hour chime on the display, with quiet hours you set.','LPN','now']]},
+    {name:'Time & routines',items:[
+      ['Countdowns','Up to eight countdowns, including birthdays that repeat every year.','LPN','now'],
+      ['Timers & focus timer','Three timers, a stopwatch, and 25/5 focus and break presets.','LPN','now'],
+      ['Wake-up & wind-down light','A daylight or red wake-up light, and a red or warm-sky wind-down before bed. The clock stays on.','LPN','now'],
+      ['Sunrise & sunset moments','A short sunrise and sunset scene at the real times for your location.','LPN','now'],
+      ['Calendars','Google, iCloud and Outlook calendars by private link, with reminders and a next-event screen.','LPN','progress'],
+      ['Morning briefing','Your day’s first events when you walk into the room in the morning.','PN','progress']]},
+    {name:'Game day',items:[
+      ['Today’s games','NFL, NBA and college football games on today: live first, then upcoming, then finals. Resets at 4 AM.','LPN','now'],
+      ['Game Day mode','Pick a favourite team and its game takes over the display, with a running game clock.','LPN','now'],
+      ['Play moments','Timeouts, first downs, big plays, fourth downs and crunch time each get their own moment, plus touchdown and win celebrations.','LPN','now'],
+      ['Runs, clutch & upset watch','Flags scoring runs, close finishes and ranked teams in trouble.','LPN','now'],
+      ['TV delay sync','Holds the score until your TV shows the play, so the display never spoils it. Set it with one tap when the TV catches up.','LPN','now'],
+      ['Manual scoreboard','Type in two teams, scores and colours for game night, rec leagues or a backyard tournament.','LPN','now'],
+      ['Game-day characters & crowd moments','Volt, the ARXI character, plus kickoff face-offs, two-minute crowd waves and on-fire runs.','LPN','progress']]},
+    {name:'Panel layouts',items:[
+      ['Three-line scoreboard','Both teams, both scores and the clock on screen at once, with no scrolling.','N','progress'],
+      ['Bigger text','Taller rows that read clearly from across the room.','N','progress'],
+      ['Lyric + info row','The lyric line and a second line of song info or an icon row together.','N','progress']]},
+    {name:'Music',items:[
+      ['Sonos & Denon HEOS','Reads what your Sonos or Denon HEOS speaker is playing and shows it on the display.','PN','now'],
+      ['Any music app','Spotify, Apple Music and more: play to your speaker and the display picks it up. No accounts to link.','PN','now'],
+      ['Synced lyrics','Lyrics timed to the song, with styles, timing offset and word-by-word highlighting.','PN','now'],
+      ['Lyric icons','122 small pictures triggered by 819 words in the lyrics, with a cooldown so it never gets busy.','PN','now'],
+      ['Sound-reactive light','A sound-level mic moves the light with the music. It measures loudness only and never listens for words or records.','PN','now']]},
+    {name:'In the room',items:[
+      ['Presence radar','mmWave radar senses whether someone is in the room, moving or still, and how far away.','PN','now'],
+      ['Room light sensor','Reads how bright the room is, with dark and bright thresholds you can calibrate.','PN','now'],
+      ['ARXI Live','Watch every sensor reading live in your browser while you tune it.','PN','now'],
+      ['Wake & auto-dim','Brightens when someone walks in and fades when the room is empty.','PN','progress'],
+      ['Smart brightness','Brightness follows the room light and how close you are.','PN','progress'],
+      ['Clap control','One, two or three claps for an action you choose, like switching house modes.','PN','progress'],
+      ['Loud-sound alert','A visual alert when the room gets loud, like a doorbell or alarm.','PN','progress'],
+      ['Temperature & humidity','Indoor readings next to the outdoor weather, with an added sensor.','PN','build']]},
+    {name:'Setup & system',items:[
+      ['No app','Every setting lives in a browser dashboard on your home Wi-Fi.','LPN','now'],
+      ['Saved Wi-Fi & time zone','Up to three saved Wi-Fi networks, your time zone and a device name.','LPN','now'],
+      ['House modes','Everyday, Game Day, Party, Chill and Night set everything with one tap, a clap or a phone link.','LPN','now'],
+      ['Connects with your other displays','A second display joins one system, hub included, and takes its own role.','LPN','now'],
+      ['Encrypted display link','The hub and displays talk over an encrypted, paired link, and find each other with no router setup.','LPN','now'],
+      ['Setup hotspot','If your Wi-Fi changes, the display offers its own setup network to reconnect.','LPN','progress'],
+      ['Wakes only where people are','In a connected house, only the rooms in use light up.','PN','build']]}
+  ];
+  const P={
+    'lite':{key:'L',name:'Lite Bar',eyebrow:'ARXI Bar · Tier 01',price:159,note:'Single Bar',w:44,h:11,
+      pitch:'The essentials on a strip of light: the time, the weather, today’s games and your own messages. Plug it in, join Wi-Fi, done.',
+      best:['Kitchen','Bedroom','Kids’ room'],
+      specs:[['Display','Slim bar, two lines of text, behind a frosted diffuser'],['Color','Full color, set pixel by pixel'],['Controller','ESP32, 2.4 GHz Wi-Fi'],['Sensors','None'],['Music','Not included'],['Power','5 V wall adapter, included'],['Settings','Browser page on your home network'],['Connects','Yes, with 2+ displays. Presence features need Pro.'],['Add-ons','7 of 10']],
+      box:['Lite Bar with diffuser front','5 V power adapter','Wall-mount hardware','Quick-start card with your settings link'],
+      scenes:[{label:'Clock & weather',icon:'sun',lines:[{t:'10:42 PM',c:WH},{t:'68* CLEAR',c:AMB}]},
+              {label:'Today’s games',lines:[{t:'NYG 17 Q3',c:CY},{t:'PHI 21 4:12',c:AMB}]},
+              {label:'Scrolling message',lines:[{t:'WELCOME',c:AMB},{t:'GAME NIGHT AT 8 - BRING SNACKS',c:WH}]}]},
+    'pro-bar':{key:'P',name:'Pro Bar',eyebrow:'ARXI Bar · Tier 02',price:249,note:'Single Bar',w:44,h:11,
+      pitch:'Everything in Lite, plus a display that notices when you walk in, follows your music and moves with the room.',
+      best:['Living room','Entryway','Office','Garage'],
+      specs:[['Display','Slim bar, two lines of text, behind a frosted diffuser'],['Color','Full color, set pixel by pixel'],['Controller','ESP32, 2.4 GHz Wi-Fi'],['Sensors','mmWave presence radar, room light sensor, sound-level mic'],['Music','What your Sonos or Denon HEOS speaker plays, from any app. Plex & Jellyfin as an add-on.'],['Power','5 V wall adapter, included'],['Settings','Browser page on your home network'],['Connects','Yes, with 2+ displays'],['Add-ons','All 10']],
+      box:['Pro Bar with diffuser front and built-in sensors','5 V power adapter','Wall-mount hardware','Quick-start card with your settings link'],
+      scenes:[{label:'Presence: someone walked in',lines:[{t:'WELCOME IN',c:AMB},{t:'68* CLEAR',c:CY}]},
+              {label:'Synced lyrics',icon:'star',iconColor:AMB,lines:[{t:'LYRICS',c:AMB},{t:'CITY LIGHTS ON THE WATER TONIGHT',c:WH}]},
+              {label:'Room empty: dimmed',dim:true,lines:[{t:'10:58',c:WH}]}]},
+    'pro-panel':{key:'N',name:'Pro Panel',eyebrow:'ARXI Panel · Tier 02 · In development',price:299,note:'Single Panel',w:44,h:22,
+      pitch:'Everything in Pro Bar on the sharper Panel, with twice the height for three lines of text, a full scoreboard and bigger type. The Panel is in development, with its layouts being built now.',
+      best:['Living room','Game room','Over the TV'],
+      specs:[['Display','Taller panel, three lines of text, behind a frosted diffuser'],['Color','Full color, set pixel by pixel'],['Controller','ESP32, 2.4 GHz Wi-Fi'],['Sensors','mmWave presence radar, room light sensor, sound-level mic'],['Music','What your Sonos or Denon HEOS speaker plays, from any app. Plex & Jellyfin as an add-on.'],['Power','5 V higher-current adapter, included'],['Settings','Browser page on your home network'],['Connects','Yes. Usually the main display when connected.'],['Add-ons','All 10']],
+      box:['Pro Panel with diffuser front and built-in sensors','5 V higher-current power adapter','Wall-mount hardware','Quick-start card with your settings link'],
+      scenes:[{label:'Three-line scoreboard',icon:'ball',lines:[{t:'NYG 17',c:CY},{t:'PHI 21',c:GRN},{t:'Q3 4:12',c:AMB}]},
+              {label:'Lyric + info row',icon:'note',lines:[{t:'NOW PLAY',c:GRN},{t:'CITY LIGHTS ON THE WATER',c:WH},{t:'LOW HOURS',c:CY}]},
+              {label:'Clock & weather',icon:'sun',lines:[{t:'10:42 PM',c:WH},{t:'68* CLEAR',c:AMB},{t:'H 74 L 58',c:CY}]}]}
+  };
+  const ORDER=['lite','pro-bar','pro-panel'];
+  const SL={now:'Working now',progress:'In progress',build:'We can build it'};
+  const flat=ArxiMatrix(document.getElementById('pm'),{w:44,h:11,onLabel:t=>{if(!m3)document.getElementById('pm-label').textContent=t}});
+  let m3=null,last=null;
+  const mx={setSize(w,h){flat.setSize(w,h);last=last||{};last.kind=h>11?'panel':'bar';if(m3)m3.setMode(last.kind)},setScenes(sc){flat.setScenes(sc);last=last||{};last.sc=sc;if(m3)m3.setScenes(last.kind,sc)}};
+  function start3d(){const st=document.getElementById('pm3d');m3=window.ArxiModels&&ArxiModels(st,{mode:last?last.kind:'bar',finish:'black',bar:last&&last.kind==='bar'?last.sc:[],panel:last&&last.kind==='panel'?last.sc:[],
+      onLabel:t=>{document.getElementById('pm-label').textContent=t},label:'3D render of this ARXI display. Drag to turn it.'});
+    if(!m3){st.hidden=true;document.getElementById('pm-flat').hidden=false;return}
+    document.getElementById('pm-fin').hidden=false;
+    document.querySelectorAll('#pm-fin button').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('#pm-fin button').forEach(x=>x.setAttribute('aria-pressed',x===b?'true':'false'));m3.setFinish(b.dataset.f)}))}
+  if(window.THREE)setTimeout(start3d,0);else{const sc=document.createElement('script');sc.src='https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';sc.onload=start3d;sc.onerror=()=>{document.getElementById('pm3d').hidden=true;document.getElementById('pm-flat').hidden=false};document.head.appendChild(sc)}
+  const $=id=>document.getElementById(id);
+
+  function renderCompare(cur){
+    const rows=[['Price',p=>'$'+p.price],['Display',p=>p.h===22?'Panel, three lines':'Bar, two lines']];
+    const feats=[['Clock, weather, scores, messages','LPN'],['Three-line layouts','N'],['Sonos & HEOS + synced lyrics','PN'],['Sound-reactive light','PN'],['Presence wake & dim','PN'],['Room light sensor','PN'],['Connects with 2+ displays','LPN'],['Wakes only where people are','PN']];
+    let h='<thead><tr><th scope="col">Feature</th>'+ORDER.map(k=>'<th scope="col" class="'+(k===cur?'cur':'')+'"><a href="#'+k+'">'+P[k].name+'</a></th>').join('')+'</tr></thead><tbody>';
+    rows.forEach(r=>{h+='<tr><th scope="row">'+r[0]+'</th>'+ORDER.map(k=>'<td class="'+(k===cur?'cur':'')+'">'+r[1](P[k])+'</td>').join('')+'</tr>'});
+    feats.forEach(f=>{h+='<tr><th scope="row">'+f[0]+'</th>'+ORDER.map(k=>'<td class="'+(k===cur?'cur':'')+'">'+(f[1].includes(P[k].key)?'<span class="dot" aria-label="Included"></span>':'<span class="no" aria-label="Not included">—</span>')+'</td>').join('')+'</tr>'});
+    h+='<tr><th scope="row">Best for</th>'+ORDER.map(k=>'<td class="'+(k===cur?'cur':'')+'">'+P[k].best.join(', ')+'</td>').join('')+'</tr></tbody>';
+    $('cmp').innerHTML=h;
+  }
+
+  let scope='mine',cur=null,openGroups=null;
+  function renderGroups(p){
+    const g=$('groups');
+    if(openGroups===null)openGroups=new Set([GROUPS[0].name]);
+    else{openGroups=new Set([...g.querySelectorAll('details.acc[open]')].map(d=>d.dataset.g))}
+    g.innerHTML='';
+    GROUPS.forEach(gr=>{
+      const mine=gr.items.filter(i=>i[2].includes(p.key));
+      const list=(scope==='mine'?mine:gr.items).filter(i=>(i[3]||'now')==='now'||gr.name==='Panel layouts');
+      if(!list.length)return;
+      const d=document.createElement('details');d.className='acc';d.dataset.g=gr.name;if(openGroups.has(gr.name))d.open=true;
+      const cnt={now:0,progress:0,build:0};list.forEach(i=>cnt[i[3]||'now']++);
+      d.innerHTML='<summary><span class="t"></span><span class="meta"></span></summary><div class="acc-body"><div class="xlist"></div></div>';
+      d.querySelector('.t').textContent=gr.name;
+      d.querySelector('.meta').textContent=list.length+' features';
+      const box=d.querySelector('.xlist');
+      list.forEach(([n,desc,t,st])=>{
+        const on=t.includes(p.key),x=document.createElement('details');x.className='xc'+(on?'':' off');
+        const need=t==='N'?'Panel only':(t==='PN'?'Pro Bar & Panel':'All models');
+        x.innerHTML='<summary><b></b></summary><div class="xb"><p></p><span class="how"></span></div>';
+        x.querySelector('b').textContent=n;x.querySelector('p').textContent=desc;
+        x.querySelector('.how').textContent=on?'On '+p.name+(t!=='LPN'?' · '+need:''):'Not on '+p.name+' · '+need;
+        box.appendChild(x)});
+      g.appendChild(d)});
+  }
+  document.querySelectorAll('#scope button').forEach(b=>b.addEventListener('click',()=>{scope=b.dataset.v;
+    document.querySelectorAll('#scope button').forEach(x=>{const on=x===b;x.setAttribute('aria-selected',on);x.setAttribute('aria-checked',on)});
+    renderGroups(P[cur])}));
+  function show(id){
+    if(!P[id])id='lite';cur=id;
+    const p=P[id];
+    document.querySelectorAll('#switch a').forEach(a=>a.setAttribute('aria-current',a.dataset.p===id?'true':'false'));
+    $('p-eyebrow').textContent=p.eyebrow;$('p-name').textContent=p.name;$('p-pitch').textContent=p.pitch;
+    $('p-price').textContent='$'+p.price;$('p-note').textContent=p.note;
+    $('p-best').innerHTML='<span class="eyebrow">Best for</span>'+p.best.map(b=>'<span class="pill on">'+b+'</span>').join('');
+    $('pm-size').innerHTML=p.h===22?'<b>Panel</b> · three lines of text':'<b>Bar</b> · two lines of text';
+    mx.setSize(p.w,p.h);mx.setScenes(p.scenes);
+    $('f-title').textContent=p.name+' features';
+    renderGroups(p);
+    $('s-title').textContent=p.name+' tech specs';
+    $('specs').innerHTML=p.specs.map(s=>'<div><dt>'+s[0]+'</dt><dd>'+s[1]+'</dd></div>').join('');
+    $('inbox').innerHTML=p.box.map(b=>'<li>'+b+'</li>').join('');
+    renderCompare(id);
+  }
+  function route(first){const h=(location.hash||'').slice(1);
+    if(P[h]){show(h);if(!first)window.scrollTo({top:0})}
+    else{if(!cur)show('lite');const el=h&&document.getElementById(h);if(el)setTimeout(()=>el.scrollIntoView({block:'start'}),first?60:0)}}
+  window.addEventListener('hashchange',()=>route(false));
+  route(true);
+})();
+</script>
+</body>
+</html>
