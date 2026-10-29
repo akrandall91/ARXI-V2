@@ -55,14 +55,14 @@
     function setShelf(sh){
       if(!sh){if(shelf)shelf.visible=false;return}
       if(!shelf){shelf=new T.Group();const top=new T.Mesh(new T.BoxGeometry(8.4,.16,1.7),new T.MeshStandardMaterial({roughness:.75,metalness:0}));top.position.set(0,-.08,.1);shelf.add(top);shelf.userData.top=top;world.add(shelf)}
-      shelf.visible=true;shelf.userData.top.material.color.set(sh.top||'#B98A5E');shelf.userData.top.material.roughness=sh.rough!=null?sh.rough:.75;shelf.userData.top.material.metalness=sh.metal||0}
+      shelf.visible=true;shelf.scale.x=(sh.w||8.4)/8.4;shelf.userData.top.material.color.set(sh.top||'#B98A5E');shelf.userData.top.material.roughness=sh.rough!=null?sh.rough:.75;shelf.userData.top.material.metalness=sh.metal||0}
     if(opts.shelf)setShelf(opts.shelf);
     const FIN={black:{c:0x08090b,r:.62,m:.25},white:{c:0xECEEF1,r:.45,m:.05}};
     function paint(u,f){const F=FIN[f];u.bodyMat.color.setHex(F.c);u.bodyMat.roughness=F.r;u.bodyMat.metalness=F.m}
     let finish=opts.finish||'mix';
     function setFinish(f){finish=f;paint(panel,f==='mix'?'white':f);paint(bar,f==='mix'?'black':f)}
     function layout(){
-      if(mode==='both'){panel.pos.set(-2.75,panel.H/2,0);panel.rot=.16;panel.scale=1;bar.pos.set(2.75,bar.H/2,.5);bar.rot=-.16;bar.scale=1}
+      if(mode==='both'){const s=opts.barLeft?-1:1;panel.pos.set(-2.75*s,panel.H/2,0);panel.rot=.16*s;panel.scale=1;bar.pos.set(2.75*s,bar.H/2,.5);bar.rot=-.16*s;bar.scale=1}
       else{const on=mode==='panel'?panel:bar,off=mode==='panel'?bar:panel;on.pos.set(0,on.H/2,0);on.rot=0;on.scale=1;off.pos.set(mode==='panel'?6:-6,off.H/2,0);off.scale=0}
     }
     let target=new T.Vector3(),camPos=new T.Vector3(),curT=new T.Vector3(),curP=new T.Vector3(),first=true;
@@ -73,7 +73,7 @@
       else if(mode==='panel'){cx=0;cy=panel.H/2;w=panel.W*.92;h=panel.H}
       else{cx=0;cy=panel.H/2;w=10.4;h=panel.H}
       const v=T.MathUtils.degToRad(cam.fov),hf=2*Math.atan(Math.tan(v/2)*aspect);
-      const d=Math.max((w*.62)/Math.tan(hf/2),(h*.85)/Math.tan(v/2))+1;
+      const d=(Math.max((w*.62)/Math.tan(hf/2),(h*.85)/Math.tan(v/2))+1)/(opts.zoom||1);
       target.set(cx,cy,0);camPos.set(cx+d*.08,cy+d*.16,d);
       if(first||reduce){curT.copy(target);curP.copy(camPos);first=false}
     }

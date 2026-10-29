@@ -119,6 +119,10 @@
     function render(now){
       let sc=scenes[idx];if(!sc)return;sc=auto(sc);
       const el=now-t0,ys=rows();grid=new Array(W*H).fill(null);
+      if(sc.moment&&window.ArxiMoments){ /* a moment from moments.js, drawn into this screen */
+        const p=ArxiMoments.frame(sc.moment,H>11?'panel':'bar',sc.mode,reduce?1500:el);
+        if(p)for(let i=0;i<W*H;i++){const r=p[i*3],g=p[i*3+1],b=p[i*3+2];if(r||g||b)grid[i]='rgb('+(r|0)+','+(g|0)+','+(b|0)+')'}
+        paint(false);return}
       const hasText=(sc.lines||[]).some(l=>l&&l.t);
       if(sc.fx&&!sc.dim)fx(sc,el,hasText?.28:1);
       (sc.lines||[]).slice(0,ys.length).forEach((l,i)=>{if(!l||!l.t)return;const tw=textW(l.t);let x=0;

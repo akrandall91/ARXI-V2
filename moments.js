@@ -209,6 +209,10 @@
     return{show(id,m){cur=M.find(x=>x.id===id)||cur;if(m)mode=m;sync()}};
   }
   ArxiMoments.list=M.map(m=>({id:m.id,name:m.name}));
+  ArxiMoments.info=id=>{const m=M.find(x=>x.id===id);return m?{id:m.id,name:m.name,period:m.period,text:m.text,extra:m.extra}:null};
+  /* one frame as raw RGB (44 x 11 or 44 x 22), for screens drawn by matrix.js (the 3D renders) */
+  const FG={bar:new Grid(44,11),panel:new Grid(44,22)};
+  ArxiMoments.frame=(id,kind,mode,t)=>{const m=M.find(x=>x.id===id);if(!m)return null;const g=FG[kind];m[kind](g,t%m.period,mode||kind);return g.p};
   /* one moment looping on one canvas: kind 'bar' or 'panel', mode as in the picker ('bar'|'panel'|'both') */
   ArxiMoments.player=function(canvas,id,o){o=o||{};const m=M.find(x=>x.id===id);if(!m||!canvas)return null;
     const kind=o.kind||'bar',mode=o.mode||kind,g=kind==='panel'?new Grid(44,22):new Grid(44,11),t0=performance.now();
