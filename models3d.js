@@ -1,4 +1,5 @@
-/* ARXI 3D product renders: a Bar and a Panel, dark enclosures with a frosted diffuser face that plays live content.
+/* Real sizes: Bar 13 x 3.5 in, Panel 13 x 7 in (W x H); the enclosures below keep those proportions.
+   ARXI 3D product renders: a Bar and a Panel, dark enclosures with a frosted diffuser face that plays live content.
    ArxiModels(stageEl,{bar:scenes,panel:scenes,mode,finish,onLabel}) -> {setMode('both'|'bar'|'panel'), setFinish('black'|'white'|'mix'), setScenes(kind,scenes)} or null when WebGL is unavailable.
    A single mode shows only that display, centred. Needs three.js (r128) and ArxiMatrix. */
 (function(){
@@ -30,7 +31,7 @@
     let mode=opts.mode||'both';
 
     function unit(cols,rows,scenes){
-      const pitch=.1,fw=cols*pitch,fh=rows*pitch,bez=.16,depth=.5,W=fw+bez*2,H=fh+bez*2,g=new T.Group();
+      const pitch=.1,fw=cols*pitch,fh=rows*pitch,bez=.16,depth=.5,W=fw+bez*2,H=fh+(rows>11?.171:.085)*2,g=new T.Group();
       const geo=new T.ExtrudeGeometry(roundedRect(T,W-.04,H-.04,.09),{depth:depth-.04,bevelEnabled:true,bevelThickness:.02,bevelSize:.02,bevelSegments:4,curveSegments:10});
       geo.translate(0,0,-(depth-.04)/2);
       const bodyMat=new T.MeshStandardMaterial({color:0x08090b,roughness:.62,metalness:.25});g.add(new T.Mesh(geo,bodyMat));
@@ -49,6 +50,13 @@
     }
     const panel=unit(44,22,opts.panel),bar=unit(44,11,opts.bar);
     world.add(panel.g,bar.g);
+    /* optional shelf the display stands on (rooms): a plank with a top and a front colour */
+    let shelf=null;
+    function setShelf(sh){
+      if(!sh){if(shelf)shelf.visible=false;return}
+      if(!shelf){shelf=new T.Group();const top=new T.Mesh(new T.BoxGeometry(8.4,.16,1.7),new T.MeshStandardMaterial({roughness:.75,metalness:0}));top.position.set(0,-.08,.1);shelf.add(top);shelf.userData.top=top;world.add(shelf)}
+      shelf.visible=true;shelf.userData.top.material.color.set(sh.top||'#B98A5E');shelf.userData.top.material.roughness=sh.rough!=null?sh.rough:.75;shelf.userData.top.material.metalness=sh.metal||0}
+    if(opts.shelf)setShelf(opts.shelf);
     const FIN={black:{c:0x08090b,r:.62,m:.25},white:{c:0xECEEF1,r:.45,m:.05}};
     function paint(u,f){const F=FIN[f];u.bodyMat.color.setHex(F.c);u.bodyMat.roughness=F.r;u.bodyMat.metalness=F.m}
     let finish=opts.finish||'mix';
@@ -95,7 +103,7 @@
       renderer.render(scene,cam);raf=requestAnimationFrame(loop);
     }
     raf=requestAnimationFrame(loop);
-    return{setMode(m){mode=m;layout();frame();const u=m==='panel'?panel:bar;if(m!=='both'&&opts.onLabel){}},setFinish,setScenes(kind,sc){(kind==='panel'?panel:bar).mx.setScenes(sc)},bar:bar.mx,panel:panel.mx};
+    return{setMode(m){mode=m;layout();frame()},setFinish,setShelf,setScenes(kind,sc){(kind==='panel'?panel:bar).mx.setScenes(sc)},bar:bar.mx,panel:panel.mx};
   }
   window.ArxiModels=ArxiModels;
 
@@ -106,7 +114,7 @@
   function makeScreen(T,cols,rows,scenes){const cv=offscreenCanvas(cols*20);const mx=window.ArxiMatrix(cv,{w:cols,h:rows});mx.setScenes(scenes||[]);
     const tex=new T.CanvasTexture(cv);tex.encoding=T.sRGBEncoding;tex.anisotropy=4;return{cv,mx,tex}}
   function makeUnit(T,kind,tex,finish,sh){
-    const cols=44,rows=kind==='panel'?22:11,pitch=.1,fw=cols*pitch,fh=rows*pitch,bez=.16,depth=.5,W=fw+bez*2,H=fh+bez*2,g=new T.Group();
+    const cols=44,rows=kind==='panel'?22:11,pitch=.1,fw=cols*pitch,fh=rows*pitch,bez=.16,depth=.5,W=fw+bez*2,H=fh+(rows>11?.171:.085)*2,g=new T.Group();
     const geo=new T.ExtrudeGeometry(roundedRect(T,W-.04,H-.04,.09),{depth:depth-.04,bevelEnabled:true,bevelThickness:.02,bevelSize:.02,bevelSegments:4,curveSegments:10});
     geo.translate(0,0,-(depth-.04)/2);const F=FINS[finish]||FINS.black;
     const bodyMat=new T.MeshStandardMaterial({color:F.c,roughness:F.r,metalness:F.m});g.add(new T.Mesh(geo,bodyMat));
@@ -179,7 +187,7 @@
     const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const scene=new T.Scene(),cam=new T.PerspectiveCamera(28,1,.1,200);lights(T,scene);const world=new T.Group();scene.add(world);
     const S=makeScreen(T,44,11,opts.scenes);
-    const cols=44,rows=11,fw=4.4,fh=1.1,bez=.16,depth=.5,W=fw+bez*2,H=fh+bez*2,fin=FINS[opts.finish||'black'];
+    const cols=44,rows=11,fw=4.4,fh=1.1,bez=.16,depth=.5,W=fw+bez*2,H=fh+(rows>11?.171:.085)*2,fin=FINS[opts.finish||'black'];
     /* back shell: an open tray */
     const back=new T.Group();
     const trayMat=new T.MeshStandardMaterial({color:fin.c,roughness:fin.r,metalness:fin.m});

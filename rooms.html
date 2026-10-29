@@ -39,6 +39,10 @@
 .detail{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:24px;display:grid;gap:18px;min-width:0;position:sticky;top:calc(env(safe-area-inset-top,0px) + 76px)}
 .detail h2{font-size:clamp(25px,4.5vw,34px)}
 .detail .desc{color:var(--muted);font-size:15px}
+.rstage{position:relative;aspect-ratio:16/10;border-radius:10px;overflow:hidden;border:1px solid var(--line);transition:background .4s}
+.rstage[hidden],#r2d[hidden]{display:none}
+.r-now{position:absolute;left:10px;bottom:10px;font:500 10px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--fg);background:rgba(255,255,255,.85);border-radius:999px;padding:3px 9px}
+.r-now:empty{display:none}
 .field{display:grid;gap:10px}
 .prod-btn small{display:block;font-size:10px;letter-spacing:.06em;opacity:.75;margin-top:2px;text-transform:none}
 .chips{display:flex;gap:8px;flex-wrap:wrap}
@@ -157,7 +161,7 @@
     <div class="wrap">
       <p class="eyebrow">Every room · room planner</p>
       <h1>Every room <em>has a job.</em></h1>
-      <p class="lede">Tap a room on the plan to see what its display would show. Pick a Bar or Panel and add it to your house. The total updates as you go. We started you with a living room and kitchen.</p>
+      <p class="lede">Tap a room to see its display. Add the ones you want.</p>
     </div>
   </section>
 
@@ -176,7 +180,8 @@
         <h2 id="d-job">The main event</h2>
         <p class="desc" id="d-desc"></p>
         <div>
-          <div class="bezel"><canvas id="d-canvas" width="880" height="220" aria-label="Preview of this room's display"></canvas></div>
+          <div class="rstage" id="r3d" hidden><span class="r-now" id="r-now"></span></div>
+          <div class="bezel" id="r2d"><canvas id="d-canvas" width="880" height="220" aria-label="Preview of this room's display"></canvas></div>
           <div class="bezel-meta"><span id="d-label"></span><span id="d-size"></span></div>
         </div>
         <div class="field">
@@ -226,6 +231,7 @@
 <footer class="site"><div class="wrap"><span>ARXI Systems · ARXI makes</span><span>ARXI Bar &amp; Panel · Every room</span></div></footer>
 
 <script src="matrix.js"></script>
+<script src="models3d.js"></script>
 <script src="cart.js"></script>
 <script>
 (function(){
@@ -234,43 +240,43 @@
   const PRO_ONLY=['Synced lyrics','Sound-reactive light'];
   const ROOMS=[
     {id:'living',name:'Living room',job:'The main event',rec:'panel',
-     desc:'Scores, synced lyrics and sound-reactive light where everyone hangs out. The Panel fits big scores over the TV.',
+     desc:'Scores and lyrics where everyone hangs out.',
      addons:['Game Day mode','Synced lyrics','House modes'],
      scenes:[{label:'Live score',lines:[{t:'DAL 24 Q4',c:WH},{t:'WAS 20 1:48',c:RED},{t:'SUN NIGHT',c:CY}]},
              {label:'Synced lyrics',icon:'note',lines:[{t:'LYRICS',c:AMB},{t:'CITY LIGHTS ON THE WATER',c:WH},{t:'LOW HOURS',c:CY}]}]},
     {id:'kitchen',name:'Kitchen',job:'The family board',rec:'lite',
-     desc:'Today\u2019s weather, timers, birthdays and \u201cdinner\u2019s ready\u201d sent from a phone. Fits over the cabinets or on the backsplash.',
+     desc:'Weather, timers and \u201cdinner\u2019s ready\u201d from your phone.',
      addons:['Messages from your phone','Timers','Countdowns & birthdays'],
      scenes:[{label:'Morning',icon:'sun',lines:[{t:'7:42 AM',c:WH},{t:'64* SUNNY',c:AMB},{t:'TUE OCT 28',c:CY}]},
              {label:'Kitchen timer',lines:[{t:'PASTA',c:AMB},{t:'8:42 LEFT',c:WH},{t:'TIMER 1',c:CY}]},
              {label:'Message from a phone',lines:[{t:'MESSAGE',c:GRN},{t:'DINNER\'S READY',c:WH},{t:'COME DOWN',c:AMB}]}]},
     {id:'entry',name:'Entryway',job:'The leave-the-house check',rec:'probar',
-     desc:'The leave-the-house check: the time, today\u2019s weather and a note from home on your way out.',
+     desc:'The time, the weather and a note on your way out.',
      addons:['Weather & forecast','Messages from your phone','Countdowns & birthdays'],
      scenes:[{label:'Heading out',icon:'drop',lines:[{t:'58* NOW',c:WH},{t:'RAIN 3 PM',c:CY},{t:'TAKE A COAT',c:AMB}]},
              {label:'Note from home',lines:[{t:'MESSAGE',c:GRN},{t:'GRAB THE MAIL',c:WH},{t:'8:05 AM',c:CY}]}]},
     {id:'bed',name:'Bedroom',job:'The quiet clock',rec:'lite',
-     desc:'A big, dim clock at night, a gentle wake-up light and the morning\u2019s weather. No bright screen by the bed.',
+     desc:'A dim clock at night and a gentle wake-up light.',
      addons:['Wake-up & wind-down light','Night style','Sunrise & sunset moments'],
      scenes:[{label:'Night: dimmed',dim:true,icon:'moon',lines:[{t:'11:20',c:WH}]},
              {label:'Morning',icon:'sun',lines:[{t:'6:30',c:AMB},{t:'SUN UP 7:24',c:WH},{t:'HIGH 71',c:CY}]}]},
     {id:'office',name:'Home office',job:'The focus bar',rec:'probar',
-     desc:'A focus timer, the time at a glance and an \u201con a call\u201d sign the whole house can read.',
+     desc:'A focus timer and an \u201con a call\u201d sign.',
      addons:['Focus timer','Show text','Clock & weather'],
      scenes:[{label:'Focus timer',lines:[{t:'FOCUS',c:AMB},{t:'18:42 LEFT',c:WH},{t:'BREAK AT 3',c:CY}]},
              {label:'Do not disturb',lines:[{t:'ON A CALL',c:RED},{t:'BACK AT 3',c:WH}]}]},
     {id:'kids',name:'Kids’ room',job:'The routine bar',rec:'lite',
-     desc:'Bedtime countdowns, birthdays and the moon tonight, in soft colors that wind down with the evening.',
+     desc:'Bedtime countdowns and birthdays, in soft colors.',
      addons:['Countdowns & birthdays','Wind-down light','Messages from your phone'],
      scenes:[{label:'Bedtime countdown',icon:'moon',lines:[{t:'BEDTIME',c:AMB},{t:'IN 20 MIN',c:WH},{t:'BRUSH TEETH',c:CY}]},
              {label:'Birthday countdown',icon:'star',iconColor:AMB,lines:[{t:'MAYA',c:AMB},{t:'BDAY IN 6',c:WH},{t:'DAYS',c:CY}]}]},
     {id:'garage',name:'Garage',job:'The shop board',rec:'probar',
-     desc:'Scores and music while you work, and a big clock you can read from across the garage.',
+     desc:'Scores, music and a clock you can read from across the garage.',
      addons:['Today\u2019s games','Synced lyrics','Show text'],
      scenes:[{label:'Scores while you work',icon:'ball',lines:[{t:'UNC 17',c:CY},{t:'DUKE 14 Q2',c:WH},{t:'LIVE',c:RED}]},
              {label:'Shop clock',lines:[{t:'2:14 PM',c:WH},{t:'71* CLOUDY',c:AMB}]}]},
     {id:'game',name:'Game room',job:'Game day HQ',rec:'panel',
-     desc:'Every game on today, live scores at kickoff and celebrations on every touchdown. Add a second display here and they split the work.',
+     desc:'Every game today, with a celebration on every touchdown.',
      addons:['Game Day mode','TV delay sync','Sound-reactive light'],
      scenes:[{label:'Game day',icon:'ball',lines:[{t:'4 GAMES',c:CY},{t:'NEXT 8:15',c:AMB},{t:'NYG AT PHI',c:WH}]},
              {label:'Touchdown',lines:[{t:'TOUCHDOWN',c:GRN},{t:'PHI 28 NYG 17',c:WH},{t:'Q4 2:10',c:AMB}]}]}
@@ -308,7 +314,7 @@
     document.getElementById('d-room').textContent=r.name;
     document.getElementById('d-job').textContent=r.job;
     document.getElementById('d-desc').textContent=r.desc;
-    document.getElementById('d-size').innerHTML=st.product==='panel'?'<b>Panel</b> · three lines of text':'<b>Bar</b> · two lines of text';
+    document.getElementById('d-size').innerHTML=st.product==='panel'?'<b>Panel</b> · 13 × 7 in · three lines':'<b>Bar</b> · 13 × 3.5 in · two lines';
     const pg=document.getElementById('d-products');pg.innerHTML='';
     Object.entries(PROD).forEach(([k,v])=>{const b=document.createElement('button');b.type='button';b.className='prod-btn';b.setAttribute('role','radio');
       b.setAttribute('aria-checked',st.product===k?'true':'false');b.setAttribute('aria-selected',st.product===k?'true':'false');
@@ -325,8 +331,19 @@
     const add=document.getElementById('d-add');
     add.textContent=st.added?'In your plan · remove':'Add '+r.name.toLowerCase()+' · '+fmt(p.price);
     add.classList.toggle('is-added',st.added);
-    if(resetPreview){mx.setSize(44,p.h);mx.setScenes(r.scenes)}
+    if(resetPreview){mx.setSize(44,p.h);mx.setScenes(r.scenes);show3d(r,st.product)}
   }
+  /* the room in 3D: the chosen display on a shelf, with the room's wall and finish */
+  const LOOK={living:{wall:'#E8E1D8',shelf:'#8A5A3A',finish:'black'},kitchen:{wall:'#F3F0EA',shelf:'#E4DED3',finish:'white',rough:.4},entry:{wall:'#E4E9EE',shelf:'#B98A5E',finish:'white'},
+    bed:{wall:'#2A3044',shelf:'#6B4A33',finish:'white'},office:{wall:'#E2E6EB',shelf:'#2B2F35',finish:'black',rough:.5},kids:{wall:'#F2E7EF',shelf:'#F1EEE8',finish:'white'},
+    garage:{wall:'#C6C9CD',shelf:'#7C8086',finish:'black',rough:.45,metal:.6},game:{wall:'#1D2129',shelf:'#3A2A20',finish:'black'}};
+  let m3=null,want=null;const r3=document.getElementById('r3d');
+  function show3d(r,prod){want=[r,prod];if(!m3)return;const L=LOOK[r.id]||LOOK.living,k=prod==='panel'?'panel':'bar';
+    m3.setMode(k);m3.setFinish(L.finish);m3.setShelf({top:L.shelf,rough:L.rough,metal:L.metal});m3.setScenes(k,r.scenes);
+    r3.style.background='radial-gradient(120% 95% at 50% 25%,'+L.wall+' 0%,'+L.wall+' 45%,color-mix(in srgb,'+L.wall+' 82%,#000) 100%)'}
+  (function(){const go=()=>{m3=window.ArxiModels&&ArxiModels(r3,{mode:'bar',finish:'black',shelf:{top:'#8A5A3A'},onLabel:t=>{document.getElementById('d-label').textContent=t},label:'3D render of this room’s display on a shelf. Drag to turn it.'});
+      if(!m3)return;r3.hidden=false;document.getElementById('r2d').hidden=true;if(want)show3d(want[0],want[1])};
+    if(window.THREE)go();else{const sc=document.createElement('script');sc.src='https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';sc.onload=go;document.head.appendChild(sc)}})();
   document.getElementById('d-add').addEventListener('click',()=>{const st=state.rooms[state.sel];st.added=!st.added;save();renderAll(false)});
 
   const ADDON={lite:139,probar:229,panel:279},HUB=49;
